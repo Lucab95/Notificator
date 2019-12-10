@@ -1,10 +1,12 @@
 package it.visualsoftware.notificator;
 
 
-import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
+import java.util.TimeZone;
 
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
@@ -36,10 +38,12 @@ class NotificatorApplicationTests {
 	@Test
 	public void populate() throws Exception{
 		long millis = new Date().getTime();
-		for (int i=1000;i<2000;i++) {
+		for (int i=3000;i<4000;i++) {
 		//NotifyContent notify = new NotifyContent("prova"+i,"content"+i,"url"+i);
-		repository.insertNotification(new Notification("luca"+i, "demo"+i,millis, "prova"+i,"content"+i,"url"+i,"token" ));
-		millis=millis+new Random().nextInt(300000)+120000; //from 2 min to 7
+		repository.insertNotification(new Notification("luca"+i, "demo"+i,
+								LocalDateTime.ofInstant(Instant.ofEpochMilli(millis), TimeZone.getDefault().toZoneId()),
+								"prova"+i,"content"+i,"url"+i,"token" ));
+		millis=millis+new Random().nextInt(240000)+120000; //from 2 min to 7
 		/*mvc.perform(MockMvcRequestBuilders
 			      .post("/create")
 			      .content(asJsonString(new Notification("luca", "demo4", new NotifyContent("prova4","content","url"))))
