@@ -2,8 +2,6 @@ package it.visualsoftware.notificator;
 
 import java.util.List;
 
-
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -17,21 +15,21 @@ import it.visualsoftware.notificator.RestTemplate.RestTemplateService;
 import it.visualsoftware.notificator.dao.NotificationDao;
 import it.visualsoftware.notificator.models.Notification;
 import it.visualsoftware.notificator.redis.RedisMessageListener;
+import it.visualsoftware.notificator.sms.Sms;
 import lombok.extern.slf4j.Slf4j;
+import it.visual.mailutils.impl.MailSender;
 
 @Slf4j
 @RestController
 @RequestMapping("/api")
 public class NotificatorController {
 	private final NotificationDao repository;
-	//private SendResult send;
 	private final RestTemplateService template;
-	//private MailSender mail;
+								//private MailSender mail;
 	public NotificatorController(NotificationDao repo, RestTemplateService template) {
 		this.template = template;
 		this.repository=repo;
-		//this.send=send;
-		//this.mail =mail;
+								//this.mail = new MailSender();
 	}
 	
 	@PostMapping("/create")
@@ -47,33 +45,31 @@ public class NotificatorController {
 	}
 	
 	//TODO stampare messaggio
-	@Async
 	@GetMapping("/message")
-	public String queue() throws JsonMappingException, JsonProcessingException{
+	public Notification queue() throws JsonMappingException, JsonProcessingException{
 		log.info("info");
 		//return RedisMessageListener.messageQueue.poll();
-		//log.info(""+RedisMessageListener.messageQueue.poll());
-		//log.info("blpop"+RedisMessageListener.jedisQueue.blpop(0,"queue"));
-		//mail.attach("ciao");
-		//send.isOk();
+		log.info("dim : "+RedisMessageListener.messageQueue.size());
 		//Notification x = new Notification("luca", "demo",new Timestamp(14584478), "appuntamento","ecco alle 10","","");
-		//String string = RedisMessageListener.jedisQueue.lpop("queue");
-		Notification string = RedisMessageListener.messageQueue.poll();
-		log.info("print before replace "+ string);
-		if (string==null){
-			return "queue empty";
+		Notification notifica = RedisMessageListener.messageQueue.poll();
+
+		//log.info("print before replace "+ RedisMessageListener.messageQueue.size());
+		if (notifica==null){
+			return new Notification(null,null,null,null,null,null,null);
 		}
-//		string = string.replace("\\","");
-//		string = string.replace("\"{","{");
-//		string = string.replace("}\"","}");
 		
-		log.info("print after replace \n   "+string.toString());
 		
-//		ObjectMapper objectMapper = new ObjectMapper();
-//		Notification x = objectMapper.readValue(string, Notification.class);
-		template.SendNotification(string);
+//								mail.from("luca.95b@live.it");
+//								mail.to("luca.95b@gmail.com");
+//								mail.subject(notifica.getTitle());
+//								mail.body(notifica.getContent());
+//								mail.send();
+//								Sms sms = new Sms();
+//								sms.sendSms(notifica.getTenant(), notifica.getTitle(), "??", "3341458565", "3382909785", notifica.getContent());
+		template.SendNotification(notifica);
+		return notifica;
 		//return string;
-		return string.toString();
+		//return new Notification(null,null,null,null,null,null,null);
 		//RedisMessageListener.messageQueue.poll());
 		//RedisMessageListener.messageQueue.poll();
 		
@@ -82,4 +78,8 @@ public class NotificatorController {
 		
 		//Notification x =  RedisMessageListener.messageList.poll();
 	}
+	
+	
+	
+
 }

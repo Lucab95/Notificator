@@ -2,8 +2,6 @@ package it.visualsoftware.notificator.dao;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Timestamp;
-
 import org.springframework.jdbc.core.RowMapper;
 
 import it.visualsoftware.notificator.models.Notification;

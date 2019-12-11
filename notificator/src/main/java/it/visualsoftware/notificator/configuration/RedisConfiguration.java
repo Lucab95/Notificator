@@ -1,4 +1,5 @@
 package it.visualsoftware.notificator.configuration;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,20 +16,18 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 //import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
-import it.visualsoftware.notificator.models.Notification;
 import it.visualsoftware.notificator.redis.MessagePublisher;
 import it.visualsoftware.notificator.redis.RedisMessageListener;
 import it.visualsoftware.notificator.redis.RedisMessagePublisher;
-import lombok.extern.slf4j.Slf4j;
 
 @Configuration
-@Slf4j
 public class RedisConfiguration {
 	private final String broadChannel;
 	ObjectMapper mapper;
 	public RedisConfiguration(@Value("${channel.broad}") String broadChannel, ObjectMapper mapper) {
 		this.broadChannel=broadChannel;
 		this.mapper=mapper;
+
 		//DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm a z");
 		//this.objectMapper= objectMapper.registerModule(new JavaTimeModule());
 	}
@@ -46,7 +45,7 @@ public class RedisConfiguration {
 	
 	@Bean
 	MessageListenerAdapter messageListener(RedisTemplate <String,Object> redisTemplate) {
-	    return new MessageListenerAdapter(new RedisMessageListener(redisTemplate,mapper));
+	    return new MessageListenerAdapter(new RedisMessageListener(mapper));
 	}
 	@Bean
     RedisMessageListenerContainer redisContainer(JedisConnectionFactory jedisConnectionFactory, RedisTemplate <String,Object> redisTemplate) {
