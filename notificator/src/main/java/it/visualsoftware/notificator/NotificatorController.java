@@ -73,7 +73,7 @@ public class NotificatorController {
 //		Notification x = objectMapper.readValue(string, Notification.class);
 		template.SendNotification(string);
 		//return string;
-		return "x";
+		return string.toString();
 		//RedisMessageListener.messageQueue.poll());
 		//RedisMessageListener.messageQueue.poll();
 		

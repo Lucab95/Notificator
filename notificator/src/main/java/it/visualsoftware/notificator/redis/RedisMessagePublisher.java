@@ -17,21 +17,16 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Service
 public class RedisMessagePublisher implements MessagePublisher {
-    private RedisTemplate<String, Notification> redisTemplate;
+    private RedisTemplate<String, Object> redisTemplate;
     private ChannelTopic topic;
   
-    public RedisMessagePublisher(RedisTemplate<String, Notification> redisTemplate, ChannelTopic topic) {
+    public RedisMessagePublisher(RedisTemplate<String, Object> redisTemplate, ChannelTopic topic) {
       this.redisTemplate = redisTemplate;
       this.topic = topic;
     }
  
     public void publish(Notification message) {
-    	log.info("pre    "+message);
-        redisTemplate.convertAndSend(topic.getTopic(), message); //serializza con objectmapper default
-        
-        //TODO
-        //object mapper va iniettato e non va fatot il new perchè in questi casi creo 2 istanze differenti
-        log.info("msg"+message);
+        redisTemplate.convertAndSend(topic.getTopic(), message); 
         log.info("canale : {} - {} ", topic.getTopic(), message);
     }
     public void publish(String message, ChannelTopic topic) {

@@ -5,15 +5,12 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
 
 import it.visualsoftware.notificator.dao.NotificationDao;
 import it.visualsoftware.notificator.models.Notification;
@@ -39,16 +36,11 @@ public class CronScheduled {
 	@Async
 	@Scheduled(cron ="${cron.string}")
 	public List<Notification> next5() throws InterruptedException, JsonProcessingException {
-		ObjectWriter ow = new ObjectMapper().writer();
-		log.info("stampa  alle "+ new Date());
+		log.info("\n stampa  alle {} \n", new Date() );
 		List<Notification> endSoon  = repository.nextMinutes(interval);
 		log.info("get \n "+ endSoon.toString());
 		for(Notification expiring : endSoon) {
-			log.info("expiring"+expiring); 	
-			String string =ow.writeValueAsString(expiring);
-			//log.info("string \n"+string);
-			//Notification x = objectMapper.readValue(string, Notification.class); 
-			//redis.publish(string,new ChannelTopic("broadcast"));
+			log.info("expiring"+expiring);
 			redis.publish(expiring);
 		}
 		return endSoon;

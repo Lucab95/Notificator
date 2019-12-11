@@ -1,6 +1,4 @@
 package it.visualsoftware.notificator.configuration;
-
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,9 +11,9 @@ import org.springframework.data.redis.listener.adapter.MessageListenerAdapter;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
+//import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+//import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import it.visualsoftware.notificator.models.Notification;
 import it.visualsoftware.notificator.redis.MessagePublisher;
@@ -26,42 +24,42 @@ import lombok.extern.slf4j.Slf4j;
 @Configuration
 @Slf4j
 public class RedisConfiguration {
-	private final String broadChannel;	
-	ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-	.registerModule(new JavaTimeModule());
-	public RedisConfiguration(@Value("${channel.broad}") String broadChannel) {
+	private final String broadChannel;
+	ObjectMapper mapper;
+	public RedisConfiguration(@Value("${channel.broad}") String broadChannel, ObjectMapper mapper) {
 		this.broadChannel=broadChannel;
+		this.mapper=mapper;
 		//DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm a z");
 		//this.objectMapper= objectMapper.registerModule(new JavaTimeModule());
 	}
 	 
 	@Bean
-	 public RedisTemplate<String, Notification> getObjectRedisTemplate(RedisConnectionFactory redisConnectionFactory){
-    	RedisTemplate<String, Notification> template = new RedisTemplate<String,Notification>();
+	 public RedisTemplate<String, Object> getObjectRedisTemplate(RedisConnectionFactory redisConnectionFactory){
+    	RedisTemplate<String, Object> template = new RedisTemplate<String,Object>();
     	template.setConnectionFactory(redisConnectionFactory);
     	template.setKeySerializer(new StringRedisSerializer());
     	template.setValueSerializer(new GenericJackson2JsonRedisSerializer(mapper));
     	template.setHashKeySerializer(new StringRedisSerializer());
-    	template.setHashValueSerializer(new GenericJackson2JsonRedisSerializer());
+    	template.setHashValueSerializer(new GenericJackson2JsonRedisSerializer(mapper));
     	return template;
     }
 	
 	@Bean
-	MessageListenerAdapter messageListener() {
-	    return new MessageListenerAdapter(new RedisMessageListener(mapper));
+	MessageListenerAdapter messageListener(RedisTemplate <String,Object> redisTemplate) {
+	    return new MessageListenerAdapter(new RedisMessageListener(redisTemplate,mapper));
 	}
 	@Bean
-    RedisMessageListenerContainer redisContainer(JedisConnectionFactory jedisConnectionFactory) {
+    RedisMessageListenerContainer redisContainer(JedisConnectionFactory jedisConnectionFactory, RedisTemplate <String,Object> redisTemplate) {
 		RedisMessageListenerContainer container 
 	      = new RedisMessageListenerContainer();
 	    container.setConnectionFactory(jedisConnectionFactory);	
-	    container.addMessageListener(messageListener(), topic());
+	    container.addMessageListener(messageListener(redisTemplate), topic());
 	    return container;
     }
 	
 
     @Bean
-    MessagePublisher redisPublisher(RedisTemplate <String,Notification> redisTemplate) {
+    MessagePublisher redisPublisher(RedisTemplate <String,Object> redisTemplate) {
         return new RedisMessagePublisher(redisTemplate, topic());
     }
     

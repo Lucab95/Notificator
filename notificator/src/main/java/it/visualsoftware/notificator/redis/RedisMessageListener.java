@@ -4,6 +4,7 @@ import java.util.LinkedList;
 import java.util.Queue;
 import org.springframework.data.redis.connection.Message;
 import org.springframework.data.redis.connection.MessageListener;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -17,13 +18,14 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class RedisMessageListener implements MessageListener {
 	public static Queue<Notification> messageQueue = new LinkedList<Notification>();
-	
+	//RQueue newQueue;
 	public ObjectMapper mapper;
 	//public static Jedis jedisQueue = new Jedis(
 										//public final RQueue newQueue;
-	public RedisMessageListener(ObjectMapper mapper) {
+	public RedisMessageListener(RedisTemplate <String,Object> redis,ObjectMapper mapper) {
 		this.mapper = mapper;
-										//this.newQueue = new RQueue(redis, "queue");
+		//this.newQueue = new RQueue(redis, "queue");
+		
 	}
 
 
@@ -32,19 +34,17 @@ public class RedisMessageListener implements MessageListener {
 	@Override
     public void onMessage(Message message, byte[] pattern) {
 		//Date date = new Date();
-		log.info("Stampa  prima della deser (onMessage) \n "+message.toString());
-		
+		log.info(" \n messaggio serializzato (onMessage) : {} ",message.toString());
+		//newQueue.listener();
 			try {
-				log.info("\n\n"+mapper.version()+"\n");
-				mapper.registerModule(new JavaTimeModule());
+				//mapper.registerModule(new JavaTimeModule());
+				log.info("dateformate {}",mapper.getDateFormat());
 				Notification notify = mapper.readValue(message.getBody(), Notification.class);
 				//JsonNode root = mapper.readTree(newState);
-
-				log.info("stampa dopo dese (onMessage) "+notify.toString());
-				
+				//newQueue.push(notify);
 				messageQueue.add(notify);
 				//newQueue.push(notify);
-				log.info("add  "+messageQueue.size());
+				log.info("dimensione coda: {}  ", messageQueue.size());
 			} catch (JsonParseException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -55,19 +55,11 @@ public class RedisMessageListener implements MessageListener {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-
-			
-		
-		//Notification body = message.getBody();
-	    //String str = new String(body);
-		
 	//TODO OBJECT MAPPER INJECT
 		
 		//("queue",message.getBody()); // message.toString());
 		//log.info("size is:"+messageQueue.size());
 		//queue.lpush("message", date.toString());
-		
-		
     }
 
 	
