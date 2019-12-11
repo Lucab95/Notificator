@@ -23,13 +23,10 @@ import it.visualsoftware.notificator.redis.RedisMessagePublisher;
 @Configuration
 public class RedisConfiguration {
 	private final String broadChannel;
-	ObjectMapper mapper;
+	private ObjectMapper mapper;
 	public RedisConfiguration(@Value("${channel.broad}") String broadChannel, ObjectMapper mapper) {
 		this.broadChannel=broadChannel;
 		this.mapper=mapper;
-
-		//DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm a z");
-		//this.objectMapper= objectMapper.registerModule(new JavaTimeModule());
 	}
 	 
 	@Bean
@@ -45,10 +42,12 @@ public class RedisConfiguration {
 	
 	@Bean
 	MessageListenerAdapter messageListener(RedisTemplate <String,Object> redisTemplate) {
-	    return new MessageListenerAdapter(new RedisMessageListener(mapper));
+	    return new MessageListenerAdapter(new RedisMessageListener(mapper,redisTemplate));
 	}
+	
+	
 	@Bean
-    RedisMessageListenerContainer redisContainer(JedisConnectionFactory jedisConnectionFactory, RedisTemplate <String,Object> redisTemplate) {
+    RedisMessageListenerContainer redisContainer(JedisConnectionFactory jedisConnectionFactory,RedisTemplate <String,Object> redisTemplate) {
 		RedisMessageListenerContainer container 
 	      = new RedisMessageListenerContainer();
 	    container.setConnectionFactory(jedisConnectionFactory);	
@@ -62,7 +61,7 @@ public class RedisConfiguration {
         return new RedisMessagePublisher(redisTemplate, topic());
     }
     
-
+    
     @Bean
     ChannelTopic topic() {
         return new ChannelTopic(broadChannel);

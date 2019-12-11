@@ -5,6 +5,7 @@ import java.util.Queue;
 
 import org.springframework.data.redis.connection.Message;
 import org.springframework.data.redis.connection.MessageListener;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonParseException;
@@ -19,21 +20,20 @@ import lombok.extern.slf4j.Slf4j;
 public class RedisMessageListener implements MessageListener {
 	public static Queue<Notification> messageQueue = new LinkedList<Notification>();
 	private final ObjectMapper mapper;
-	public RedisMessageListener(ObjectMapper mapper) {
+	RedisQueueEx redisQueue; 
+	public RedisMessageListener(ObjectMapper mapper, RedisTemplate<String, Object> redisTemplate) {
 		this.mapper = mapper;
-		
+		this.redisQueue=new RedisQueueEx(redisTemplate, "name");
 	}
 
 	@Override
     public void onMessage(Message message, byte[] pattern) {
-		//Date date = new Date();
 		
 		log.info(" \n\n messaggio serializzato (onMessage) : {}  size: {} \n",message.toString(),messageQueue.size() );
-		//newQueue.listener();
 			try {
 				Notification notify = mapper.readValue(message.getBody(), Notification.class);
-				//JsonNode root = mapper.readTree(newState);
 				messageQueue.add(notify);
+				redisQueue.push(notify);
 				//newQueue.push(notify);
 				log.info("dimensione coda: {}",messageQueue.size());
 			} catch (JsonParseException e) {
