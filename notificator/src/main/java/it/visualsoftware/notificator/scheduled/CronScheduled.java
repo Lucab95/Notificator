@@ -33,17 +33,39 @@ public class CronScheduled {
 		//this.redis=redis;
 	}
 	
+	/**
+	 * schedula la prossima ora,  ogni ora dalle 7:50 alle 18:50
+	 * @return
+	 * @throws InterruptedException
+	 * @throws JsonProcessingException
+	 */
 	@Async
-	@Scheduled(cron ="${cron.string}")
-	public List<Notification> next5() throws InterruptedException, JsonProcessingException {
+	@Scheduled(cron ="${cron.string.min}")
+	public List<Notification> nextHour() throws InterruptedException, JsonProcessingException {
 		log.info("\n stampa  alle {} \n", new Date() );
-		List<Notification> endSoon  = repository.nextMinutes(interval);
-		log.info("get \n "+ endSoon.toString());
-		for(Notification expiring : endSoon) {
+		List<Notification> endSoon = repository.nextHour(interval);
+		//List<Notification> endSoon  = repository.nextMinutes(interval);
+		log.info("get {}", endSoon.size());
+		/*for(Notification expiring : endSoon) {
 			log.info("expiring"+expiring);
 			redis.publish(expiring);
-		}
+		}*/
 		return endSoon;
 	}
 	
+	/**
+	 * ogni minuto invia le notifiche per il blocco successivo
+	 */
+//	@Async
+//	@Scheduled(cron ="${cron.string.min}")
+//	public List<Notification> nextMin() throws InterruptedException, JsonProcessingException {
+//		log.info("\n stampa  alle {} \n", new Date() );
+//		List<Notification> endSoon  = repository.nextMinutes(interval);
+//		log.info("get \n "+ endSoon.toString());
+//		for(Notification expiring : endSoon) {
+//			log.info("expiring"+expiring);
+//			redis.publish(expiring);
+//		}
+//		return endSoon;
+//	}
 }

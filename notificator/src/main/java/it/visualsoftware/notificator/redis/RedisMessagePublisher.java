@@ -25,8 +25,11 @@ public class RedisMessagePublisher implements MessagePublisher {
       this.topic = topic;
     }
  
+    /**
+     * param 
+     */
     public void publish(Notification message) {
-        redisTemplate.convertAndSend(topic.getTopic(), message); 
+        redisTemplate.convertAndSend(topic.getTopic(), message);
         log.info("canale : {} - {} ", topic.getTopic(), message);
     }
     public void publish(String message, ChannelTopic topic) {

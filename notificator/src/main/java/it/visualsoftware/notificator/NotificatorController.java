@@ -24,10 +24,10 @@ import it.visual.mailutils.impl.MailSender;
 @RequestMapping("/api")
 public class NotificatorController {
 	private final NotificationDao repository;
-	private final RestTemplateService template;
+	
 								//private MailSender mail;
-	public NotificatorController(NotificationDao repo, RestTemplateService template) {
-		this.template = template;
+	public NotificatorController(NotificationDao repo) {
+//		this.template = template;
 		this.repository=repo;
 								//this.mail = new MailSender();
 	}
@@ -46,17 +46,17 @@ public class NotificatorController {
 	
 	//TODO stampare messaggio
 	@GetMapping("/message")
-	public Notification queue() throws JsonMappingException, JsonProcessingException{
+	public void queue(){
 		log.info("info");
 		//return RedisMessageListener.messageQueue.poll();
-		log.info("dim : "+RedisMessageListener.messageQueue.size());
-		//Notification x = new Notification("luca", "demo",new Timestamp(14584478), "appuntamento","ecco alle 10","","");
-		Notification notifica = RedisMessageListener.messageQueue.poll();
+//		log.info("dim : "+RedisMessageListener.messageQueue.size());
+//		Notification x = new Notification("luca", "demo",new Timestamp(14584478), "appuntamento","ecco alle 10","","");
+//		Notification notifica = RedisMessageListener.messageQueue.poll();
 
 		//log.info("print before replace "+ RedisMessageListener.messageQueue.size());
-		if (notifica==null){
-			return new Notification(null,null,null,null,null,null,null);
-		}
+//		if (notifica==null){
+//			return new Notification(null,null,null,null,null,null,null);
+//		}
 		
 		
 //								mail.from("luca.95b@live.it");
@@ -66,10 +66,8 @@ public class NotificatorController {
 //								mail.send();
 //								Sms sms = new Sms();
 //								sms.sendSms(notifica.getTenant(), notifica.getTitle(), "??", "3341458565", "3382909785", notifica.getContent());
-		template.SendNotification(notifica);
-		return notifica;
-		//return string;
-		//return new Notification(null,null,null,null,null,null,null);
+//								template.SendNotification(notifica);
+//		return notifica;
 		//RedisMessageListener.messageQueue.poll());
 		//RedisMessageListener.messageQueue.poll();
 		

@@ -16,22 +16,26 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 //import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
+import it.visualsoftware.notificator.RestTemplate.RestTemplateService;
 import it.visualsoftware.notificator.redis.MessagePublisher;
 import it.visualsoftware.notificator.redis.RedisMessageListener;
 import it.visualsoftware.notificator.redis.RedisMessagePublisher;
+import it.visualsoftware.notificator.redis.RedisQueueEx;
 
 @Configuration
 public class RedisConfiguration {
 	private final String broadChannel;
 	private ObjectMapper mapper;
-	public RedisConfiguration(@Value("${channel.broad}") String broadChannel, ObjectMapper mapper) {
+	private final RestTemplateService template;
+	public RedisConfiguration(@Value("${channel.broad}") String broadChannel, ObjectMapper mapper, RestTemplateService template) {
 		this.broadChannel=broadChannel;
 		this.mapper=mapper;
+		this.template=template;
 	}
 	 
 	@Bean
 	 public RedisTemplate<String, Object> getObjectRedisTemplate(RedisConnectionFactory redisConnectionFactory){
-    	RedisTemplate<String, Object> template = new RedisTemplate<String,Object>();
+    	RedisTemplate<String, Object> template = new RedisTemplate<String,Object>(); 
     	template.setConnectionFactory(redisConnectionFactory);
     	template.setKeySerializer(new StringRedisSerializer());
     	template.setValueSerializer(new GenericJackson2JsonRedisSerializer(mapper));
@@ -40,18 +44,25 @@ public class RedisConfiguration {
     	return template;
     }
 	
+	@Bean 
+	RedisQueueEx getQueue(RedisTemplate <String,Object> redisTemplate) {
+		RedisQueueEx queue = new RedisQueueEx(redisTemplate, "queue");
+		return queue;
+	}
+	
 	@Bean
-	MessageListenerAdapter messageListener(RedisTemplate <String,Object> redisTemplate) {
-	    return new MessageListenerAdapter(new RedisMessageListener(mapper,redisTemplate));
+	MessageListenerAdapter messageListener(RedisQueueEx queue) {
+		queue.listener(mapper,template);
+	    return new MessageListenerAdapter(new RedisMessageListener(mapper,queue));
 	}
 	
 	
 	@Bean
-    RedisMessageListenerContainer redisContainer(JedisConnectionFactory jedisConnectionFactory,RedisTemplate <String,Object> redisTemplate) {
+    RedisMessageListenerContainer redisContainer(JedisConnectionFactory jedisConnectionFactory,RedisQueueEx queue) {
 		RedisMessageListenerContainer container 
 	      = new RedisMessageListenerContainer();
 	    container.setConnectionFactory(jedisConnectionFactory);	
-	    container.addMessageListener(messageListener(redisTemplate), topic());
+	    container.addMessageListener(messageListener(queue), topic());
 	    return container;
     }
 	

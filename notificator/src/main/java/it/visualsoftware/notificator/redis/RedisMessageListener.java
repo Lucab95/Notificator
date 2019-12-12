@@ -14,28 +14,33 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import it.visualsoftware.notificator.models.Notification;
 import lombok.extern.slf4j.Slf4j;
-
+/**
+ */
 @Service
 @Slf4j
 public class RedisMessageListener implements MessageListener {
-	public static Queue<Notification> messageQueue = new LinkedList<Notification>();
+	//public static Queue<Notification> messageQueue = new LinkedList<Notification>();
 	private final ObjectMapper mapper;
-	RedisQueueEx redisQueue; 
-	public RedisMessageListener(ObjectMapper mapper, RedisTemplate<String, Object> redisTemplate) {
+	private RedisQueueEx redisQueue; 
+	public RedisMessageListener(ObjectMapper mapper, RedisQueueEx queue) {
 		this.mapper = mapper;
-		this.redisQueue=new RedisQueueEx(redisTemplate, "name");
+		this.redisQueue=queue;
 	}
 
+	/**
+	 * quando riceve un messaggio lo serializza e lo mette in coda
+	 * @param message
+	 * @param pattern
+	 */
 	@Override
     public void onMessage(Message message, byte[] pattern) {
 		
-		log.info(" \n\n messaggio serializzato (onMessage) : {}  size: {} \n",message.toString(),messageQueue.size() );
+		log.info(" \n\n messaggio serializzato (onMessage) : {} \n", message.toString() );
 			try {
 				Notification notify = mapper.readValue(message.getBody(), Notification.class);
-				messageQueue.add(notify);
 				redisQueue.push(notify);
-				//newQueue.push(notify);
-				log.info("dimensione coda: {}",messageQueue.size());
+				//messageQueue.add(notify);
+				//log.info("dimensione coda: {}",messageQueue.size());
 			} catch (JsonParseException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

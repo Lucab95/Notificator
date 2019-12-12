@@ -6,6 +6,11 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
+/**
+ * 
+ * @author luca9
+ *definisco il bean dell'ObjectMapper per utilizzarlo come singleton
+ */
 @Configuration
 public class ObjectMapperConfiguration {
 	

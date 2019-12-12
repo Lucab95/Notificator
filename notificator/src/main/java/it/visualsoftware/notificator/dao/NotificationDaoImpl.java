@@ -1,6 +1,7 @@
 package it.visualsoftware.notificator.dao;
 
 import java.sql.Timestamp;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -59,6 +60,30 @@ public class NotificationDaoImpl implements NotificationDao {
 		return template.query(sql, new NotificationRowMapper());
 		
 		//publish su redis
+	}
+	
+	@Override
+	public List<Notification> nextHour(long interval) {
+		Calendar now = Calendar.getInstance();
+		int startHour = now.get(Calendar.HOUR);
+		//now.set(Calendar.MILLISECOND, 0);
+		now.set(Calendar.SECOND,0);
+		now.set(Calendar.MINUTE,0);
+		now.set(Calendar.HOUR,startHour+1);
+		Calendar after = (Calendar) now.clone();
+		
+		after.set(Calendar.HOUR,startHour+2);
+		Timestamp start = new Timestamp(now.getTimeInMillis());
+		Timestamp end = new Timestamp(after.getTimeInMillis());
+//		now.setNanos(0);
+//		now.setMinutes(0);
+//		now.setSeconds(0);
+//		log.info("interval"+ interval +"  "+nowMillis);
+//		long afterMillis = now.getTime() + interval;
+// 		Timestamp after = new Timestamp(afterMillis).getHours();
+		log.info("from min "+ start + " to " + end );
+		String sql ="SELECT * FROM notification WHERE end_date BETWEEN '" + start     + "' AND '" +end+ "'";
+		return template.query(sql, new NotificationRowMapper());
 	}
 	
 }
