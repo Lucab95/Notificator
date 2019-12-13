@@ -48,6 +48,7 @@ public class NotificatorController {
 	@GetMapping("/message")
 	public void queue(){
 		log.info("info");
+		//RedisMessageListener.jedis.zcard("queue");
 		//return RedisMessageListener.messageQueue.poll();
 //		log.info("dim : "+RedisMessageListener.messageQueue.size());
 //		Notification x = new Notification("luca", "demo",new Timestamp(14584478), "appuntamento","ecco alle 10","","");
