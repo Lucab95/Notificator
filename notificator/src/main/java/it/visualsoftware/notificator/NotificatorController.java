@@ -2,29 +2,32 @@ package it.visualsoftware.notificator;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-
-import it.visualsoftware.notificator.RestTemplate.RestTemplateService;
+//import com.fasterxml.jackson.core.JsonProcessingException;
+//import com.fasterxml.jackson.databind.JsonMappingException;
+//
+//import it.visualsoftware.notificator.RestTemplate.RestTemplateService;
 import it.visualsoftware.notificator.dao.NotificationDao;
 import it.visualsoftware.notificator.models.Notification;
-import it.visualsoftware.notificator.redis.RedisMessageListener;
-import it.visualsoftware.notificator.sms.Sms;
+import it.visualsoftware.notificator.redis.RedisHash;
+//import it.visualsoftware.notificator.redis.RedisMessageListener;
+//import it.visualsoftware.notificator.sms.Sms;
 import lombok.extern.slf4j.Slf4j;
-import it.visual.mailutils.impl.MailSender;
+//import it.visual.mailutils.impl.MailSender;
 
 @Slf4j
 @RestController
 @RequestMapping("/api")
 public class NotificatorController {
 	private final NotificationDao repository;
-	
+	@Autowired
+	private RedisHash hash;
 								//private MailSender mail;
 	public NotificatorController(NotificationDao repo) {
 //		this.template = template;
@@ -48,6 +51,8 @@ public class NotificatorController {
 	@GetMapping("/message")
 	public void queue(){
 		log.info("info");
+		//hash.get("expiring");
+		hash.flush();
 		//RedisMessageListener.jedis.zcard("queue");
 		//return RedisMessageListener.messageQueue.poll();
 //		log.info("dim : "+RedisMessageListener.messageQueue.size());

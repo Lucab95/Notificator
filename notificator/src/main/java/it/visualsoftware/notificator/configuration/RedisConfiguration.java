@@ -18,6 +18,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import it.visualsoftware.notificator.RestTemplate.RestTemplateService;
 import it.visualsoftware.notificator.redis.MessagePublisher;
+import it.visualsoftware.notificator.redis.RedisHash;
 import it.visualsoftware.notificator.redis.RedisMessageListener;
 import it.visualsoftware.notificator.redis.RedisMessagePublisher;
 import it.visualsoftware.notificator.redis.RedisQueueEx;
@@ -48,6 +49,11 @@ public class RedisConfiguration {
 	RedisQueueEx getQueue(RedisTemplate <String,Object> redisTemplate) {
 		RedisQueueEx queue = new RedisQueueEx(redisTemplate, "queue");
 		return queue;
+	}
+	@Bean
+	RedisHash getHash(RedisTemplate<String, Object> redisTemplate) {
+		RedisHash hash = new RedisHash(redisTemplate, "hash");
+		return hash;
 	}
 	
 	@Bean

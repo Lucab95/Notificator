@@ -14,7 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+//import com.fasterxml.jackson.databind.ObjectMapper;
 
 import it.visualsoftware.notificator.dao.NotificationDao;
 import it.visualsoftware.notificator.models.Notification;
@@ -53,7 +53,7 @@ class NotificatorApplicationTests {
 		*/
 		
 		}
-		log.info("ciao");
+		log.info("inserimento completato");
 
 	}
 	
@@ -63,12 +63,4 @@ class NotificatorApplicationTests {
 		log.info("print \n" +x.toString());
 	}
 
-
-	private String asJsonString(Object obj) {
-		 try {
-		        return new ObjectMapper().writeValueAsString(obj);
-		    } catch (Exception e) {
-		        throw new RuntimeException(e);
-		    }
-	}
 }

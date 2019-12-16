@@ -66,13 +66,14 @@ public class NotificationDaoImpl implements NotificationDao {
 	public List<Notification> nextHour(long interval) {
 		Calendar now = Calendar.getInstance();
 		int startHour = now.get(Calendar.HOUR);
-		//now.set(Calendar.MILLISECOND, 0);
-		now.set(Calendar.SECOND,0);
-		now.set(Calendar.MINUTE,0);
-		now.set(Calendar.HOUR,startHour+1);
+		log.info("start"+startHour);
+		now.set(Calendar.MILLISECOND,00);
+		now.set(Calendar.SECOND,00);
+		now.set(Calendar.MINUTE,00);
+		now.set(Calendar.HOUR,startHour+1);//7:50->8:00
 		Calendar after = (Calendar) now.clone();
 		
-		after.set(Calendar.HOUR,startHour+2);
+		after.set(Calendar.HOUR,startHour+2);//8->9
 		Timestamp start = new Timestamp(now.getTimeInMillis());
 		Timestamp end = new Timestamp(after.getTimeInMillis());
 //		now.setNanos(0);
@@ -82,7 +83,7 @@ public class NotificationDaoImpl implements NotificationDao {
 //		long afterMillis = now.getTime() + interval;
 // 		Timestamp after = new Timestamp(afterMillis).getHours();
 		log.info("from min "+ start + " to " + end );
-		String sql ="SELECT * FROM notification WHERE end_date BETWEEN '" + start     + "' AND '" +end+ "'";
+		String sql ="SELECT * FROM notification WHERE end_date BETWEEN '" + start     + "' AND '" +end+ "' ORDER BY end_date ASC";
 		return template.query(sql, new NotificationRowMapper());
 	}
 	

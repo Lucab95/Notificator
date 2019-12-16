@@ -2,6 +2,7 @@ package it.visualsoftware.notificator.models;
 
 
 import java.time.LocalDateTime;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import lombok.Data;
@@ -30,5 +31,9 @@ public @Data class Notification {
 		this.content=content;
 		this.url = url;
 		this.token=token;
+	}
+	
+	public int getMin() {
+		return this.endDate.getMinute();
 	}
 }
