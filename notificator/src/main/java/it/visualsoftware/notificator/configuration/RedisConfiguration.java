@@ -52,7 +52,7 @@ public class RedisConfiguration {
 	}
 	@Bean
 	RedisHash getHash(RedisTemplate<String, Object> redisTemplate) {
-		RedisHash hash = new RedisHash(redisTemplate, "hash");
+		RedisHash hash = new RedisHash(redisTemplate,mapper);
 		return hash;
 	}
 	

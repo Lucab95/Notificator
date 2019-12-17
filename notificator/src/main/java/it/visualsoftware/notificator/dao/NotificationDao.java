@@ -10,7 +10,7 @@ public interface NotificationDao {
 	
 	void insertNotification(Notification notify);
 	
-	List<Notification> nextMinutes(long interval);
+	//List<Notification> nextMinutes(long interval);
 	
 	List<Notification> nextHour(long interval);
 

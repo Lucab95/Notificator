@@ -46,21 +46,21 @@ public class NotificationDaoImpl implements NotificationDao {
         
 	}
 
-	@Override
-	public List<Notification> nextMinutes(long interval) {
-		interval=interval*60000;
-		long nowMillis = new Date().getTime();
-		Timestamp now = new Timestamp(nowMillis);
-		now.setNanos(0);
-		log.info("interval"+ interval +"  "+nowMillis);
-		long afterMillis = now.getTime() + interval;
- 		Timestamp after = new Timestamp(afterMillis);
-		log.info("from min "+ now + " to " + after );
-		String sql ="SELECT * FROM notification WHERE end_date BETWEEN '" +now+ "' AND '" +after+ "'";
-		return template.query(sql, new NotificationRowMapper());
-		
-		//publish su redis
-	}
+//	@Override
+//	public List<Notification> nextMinutes(long interval) {
+//		interval=interval*60000;
+//		long nowMillis = new Date().getTime();
+//		Timestamp now = new Timestamp(nowMillis);
+//		now.setNanos(0);
+//		log.info("interval"+ interval +"  "+nowMillis);
+//		long afterMillis = now.getTime() + interval;
+// 		Timestamp after = new Timestamp(afterMillis);
+//		log.info("from min "+ now + " to " + after );
+//		String sql ="SELECT * FROM notification WHERE end_date BETWEEN '" +now+ "' AND '" +after+ "'";
+//		return template.query(sql, new NotificationRowMapper());
+//		
+//		//publish su redis
+//	}
 	
 	@Override
 	public List<Notification> nextHour(long interval) {

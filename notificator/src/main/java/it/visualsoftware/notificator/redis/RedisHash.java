@@ -1,11 +1,17 @@
 package it.visualsoftware.notificator.redis;
 
 
+import java.util.ArrayList;
 import java.util.List;
 //import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import it.visualsoftware.notificator.RestTemplate.RestTemplateService;
 import it.visualsoftware.notificator.models.Notification;
 import lombok.extern.slf4j.Slf4j;
 
@@ -13,14 +19,15 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class RedisHash {
 	protected final RedisTemplate<String,Object> redis;
-	protected final String hashName;
+	protected final ObjectMapper mapper; 
 	
-	public RedisHash(RedisTemplate<String,Object> redis,String hashName) {
+	
+	public RedisHash(RedisTemplate<String,Object> redis, ObjectMapper mapper ) {
 		this.redis=redis;
-		this.hashName=hashName;
+		this.mapper=mapper;
 	}
 	
-	public void put(int key , List<Notification> notify) {
+	public void put(String hashName, int key , List<Notification> notify) {
 		
 		log.info("add scheduled notification");
 		redis.opsForHash().put(hashName, String.valueOf(key), notify);
@@ -28,22 +35,21 @@ public class RedisHash {
 
 		}
 	
-	public Object get(String key) {
+	public List<Notification> get(String hashName, int key) {
 		log.info("try get");
 		//BoundHashOperations<String, String, Notification> operations = redis.boundHashOps(hashName);
-		Object map = redis.opsForHash().get(hashName,key);
-		log.info("asdad"+redis.opsForHash().keys("15"));
+		Object map = redis.opsForHash().get(hashName,String.valueOf(key));
 		if (map==null) {
 			log.info("no keys found");
-			return null;
+			return new ArrayList<Notification>();
 		}
-		/*redis.opsForHash().delete(key, *);*/
-		log.info("keys found"+map.toString());
-		//log.info("map " + map.size());
-		return map;
+		List<Notification> minuteList = mapper.convertValue(map, new TypeReference<List<Notification>>(){});
+		
+		return minuteList;
 	}
 	
-	public void flush() {
+	public void flush(String hashName) {
+		log.info("deleted"+hashName);
 		redis.delete(hashName);
 	}
 }

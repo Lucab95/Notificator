@@ -52,7 +52,7 @@ public class NotificatorController {
 	public void queue(){
 		log.info("info");
 		//hash.get("expiring");
-		hash.flush();
+		hash.flush("pari");
 		//RedisMessageListener.jedis.zcard("queue");
 		//return RedisMessageListener.messageQueue.poll();
 //		log.info("dim : "+RedisMessageListener.messageQueue.size());

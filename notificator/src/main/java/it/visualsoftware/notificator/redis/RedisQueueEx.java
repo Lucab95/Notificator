@@ -27,7 +27,6 @@ public class RedisQueueEx extends RedisQueue<Notification>{
 	@Override
 	public void push(Notification job) {
 		log.info("Push Job to queue: {}",job);
-		
 		BoundListOperations<String, Object> operations=redis.boundListOps(queueName);
 		operations.leftPush(job);
 	}
@@ -42,10 +41,9 @@ public class RedisQueueEx extends RedisQueue<Notification>{
 		log.info("Open listener on queue: {}",queueName);
 		ListOperations<String, Object> operations=redis.opsForList();//rightPopAndLeftPush(queueName, "", timeout, unit)boundListOps();
 		while (true) {
-			Object job = (Object) operations.rightPopAndLeftPush(queueName, "executingJob",0,TimeUnit.SECONDS);
+			Object job = (Object) operations.rightPop(queueName, 0, TimeUnit.SECONDS);
 			//T job = (T) operations.rightPop(queueName);
 			if (job!=null) {
-				log.info("\n");
 				log.info("Received job: {}", job);
 				//Execution execution=executions.create(job.getTenantId(),ExecutionType.CAMPAIGN, job.getId(), job.getName());
 				//Execution execution=executions.findOne(job.getTenantId(), job.getExecutionId());

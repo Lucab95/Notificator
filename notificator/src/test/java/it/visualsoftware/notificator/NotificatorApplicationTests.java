@@ -59,8 +59,8 @@ class NotificatorApplicationTests {
 	
 	@Test
 	public void getat5() {
-		List<Notification> x = repository.nextMinutes(300000);
-		log.info("print \n" +x.toString());
+		//List<Notification> x = repository.nextMinutes(300000);
+		//log.info("print \n" +x.toString());
 	}
 
 }

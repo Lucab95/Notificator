@@ -20,8 +20,10 @@ public class RestTemplateService {
 	}
 	
 	public ResponseEntity<String> SendNotification(Notification notify) {
-		String uri = "http://europe-west1-leadmanager-notification.cloudfunctions.net/notify";
+		String uri = "http://europe-west1-leadmanager-notification.cloudfunctions.net/notify";//endpoiint
 		notify.setToken("c6MXZlyo7ss:APA91bFSlYVjYw6xS8L0rz9ZzfacjOi9HTCR54xVFPDUONr7VNSKT0_XkgrQyAUxbCHcJJ8iHBBTCJkSeY13twzvtUjMt_kVQzNAZ3yannBzpjbtkxvWB-i_kdnemS5yubWiUw7K_6s0");
+		notify.setTitle("appuntamento di " +notify.getTitle());
+		notify.setContent(notify.getContent() + "delle ore "+ notify.getEndDate());
 		HttpHeaders headers = new HttpHeaders();
 		HttpMethod httpMethod = HttpMethod.valueOf("POST");
 		headers.set("Authorization","Bearer zgmvsCuoSrfOQMBfnc8i");

@@ -1,10 +1,10 @@
 package it.visualsoftware.notificator.scheduler;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableAsync;
@@ -16,81 +16,88 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import it.visualsoftware.notificator.dao.NotificationDao;
 import it.visualsoftware.notificator.models.Notification;
 import it.visualsoftware.notificator.redis.RedisHash;
+import it.visualsoftware.notificator.redis.RedisQueueEx;
 import lombok.extern.slf4j.Slf4j;
+import net.javacrumbs.shedlock.core.SchedulerLock;
 
 @Component
 @EnableAsync
-//@EnableSchedulerLock(defaultLockAtMostFor = "PT45S")
 @Slf4j
 public class TaskScheduled {
 	private NotificationDao repository;
 	//@Autowired
 	//RedisMessagePublisher redis;
-	@Autowired
+	private RedisQueueEx redisQueue;
 	RedisHash hash;
 	@Value("${expire.interval}") 
 	long interval;
 	
 	
-	public TaskScheduled(NotificationDao repository/*, RedisMessagePublisher redis*/) {
+	
+	public TaskScheduled(NotificationDao repository, RedisHash hash, RedisQueueEx redisQueue/*, RedisMessagePublisher redis*/) {
 		this.repository=repository;
+		this.hash= hash;
+		this.redisQueue=redisQueue;
 		//this.redis=redis;
 	}
-	
 	/**
 	 * schedula la prossima ora,  ogni ora dalle 7:50 alle 18:50
 	 * @return
 	 * @throws InterruptedException
 	 * @throws JsonProcessingException
 	 */
-	//TODO INSERIRE L'ULTIMO ELEMENTO, E PREVEDERE COSA SUCCEDE QUANDO MANCANO 10 MINUTI E QUINDI ANDREBBERO PERSI
+	//TODO PREVEDERE COSA SUCCEDE QUANDO MANCANO 10 MINUTI E QUINDI ANDREBBERO PERSI
 	@Async
-	@Scheduled(cron ="${cron.string.min}")
-	/*@SchedulerLock(name = "TaskScheduler_nextHour", 
-    lockAtLeastForString = "PT5S", lockAtMostForString = "PT40S")*/
+	@Scheduled(cron ="${cron.string.hour}")
+	@SchedulerLock(name = "TaskScheduler_nextHour", lockAtLeastForString = "PT5S", lockAtMostForString = "PT40S")
 	public List<Notification> nextHour() throws InterruptedException, JsonProcessingException {
-		hash.flush();
-		log.info("\n stampa  alle {} \n", new Date() );
-		List<Notification> endSoon = repository.nextHour(interval);
-		//List<Notification> endSoon  = repository.nextMinutes(interval);
-		//hash.put("expiring", endSoon);
-		log.info("get {}", endSoon.size());
 		int currentMin = 0;
+		int hour = Calendar.getInstance().get(Calendar.HOUR)+1;
+		String hashName = (hour%2==0) ?  "pari" : "pari";
+		hash.flush(hashName);
+		log.info("\n stampa  alle {} \n", Calendar.getInstance() );
+		
+		List<Notification> endSoon = repository.nextHour(interval);
+		log.info("get {}", endSoon.size());
+		
 		List<Notification> inThisMin = new ArrayList<Notification>();
 		for(Notification notify : endSoon) {//non esegue l'ultimo
 			int min = notify.getMin();
-			if (currentMin==0) 
-				currentMin=min;
-			log.info("min {} e list {} ", currentMin, inThisMin);
+			log.info("min {} e list {} ", currentMin, inThisMin);//errore
 			if(min!=currentMin){
 				//minuto diverso, invio la lista e la svuoto per il minuto successivo
-				hash.put(currentMin,inThisMin);
+				hash.put(hashName,currentMin,inThisMin);
 				inThisMin.clear();
 				currentMin=min;
 			}
 			inThisMin.add(notify);
 		}
-		//hash.put(currentMin, inThisMin);
+		hash.put(hashName,currentMin, inThisMin);
 		
 //		hash.get("expiring");
 		return endSoon;
 	}
-//	
-//	/**
-//	 * ogni minuto invia le notifiche per il blocco successivo
-//	 */
-//	@Async
-//	@Scheduled(cron ="${cron.string.min}")
-//	@SchedulerLock(name = "TaskScheduler_nextHour", 
-//    lockAtLeastForString = "PT15S", lockAtMostForString = "PT40S")
-//	public List<Notification> nextMin() throws InterruptedException, JsonProcessingException {
-//		log.info("\n stampa  alle {} \n", new Date() );
-//		List<Notification> endSoon  = repository.nextMinutes(interval);
-//		log.info("get \n "+ endSoon.toString());
-//		for(Notification expiring : endSoon) {
-//			log.info("expiring"+expiring);
-//			redis.publish(expiring);
-//		}
-//		return endSoon;
-//	}
+	
+	/**
+	 * ogni minuto invia le notifiche per il blocco successivo
+	 */
+	@Async
+	@Scheduled(cron="${cron.string.10min}")
+	@Scheduled(cron ="${cron.string.min}")
+	@SchedulerLock(name = "TaskScheduler_nextMin", lockAtLeastForString = "PT15S", lockAtMostForString = "PT40S")
+	public void nextMin() throws InterruptedException, JsonProcessingException {
+		Calendar now = Calendar.getInstance();
+		log.info(" stampa  alle {} ", new Date() );
+		now.add(Calendar.MINUTE, 10);
+		int hour = now.get(Calendar.HOUR);
+		int min = now.get(Calendar.MINUTE);
+		log.info("print {}:{}",hour,min);
+		String hashName = (hour%2==0) ?  "pari" : "pari";
+		List<Notification> inThisMin = hash.get(hashName, min);
+		log.info("Lista :"+inThisMin.toString());
+		for (Notification notify : inThisMin )
+			redisQueue.push(notify);
+		
+		//return endSoon;
+	}
 }
