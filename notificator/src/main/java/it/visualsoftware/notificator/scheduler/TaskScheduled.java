@@ -34,6 +34,9 @@ public class TaskScheduled {
 	
 	
 	
+	
+	
+	
 	public TaskScheduled(NotificationDao repository, RedisHash hash, RedisQueueEx redisQueue/*, RedisMessagePublisher redis*/) {
 		this.repository=repository;
 		this.hash= hash;

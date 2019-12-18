@@ -21,9 +21,11 @@ import net.javacrumbs.shedlock.spring.annotation.EnableSchedulerLock;
 @ComponentScan("it.visualsoftware.notificator.scheduler")
 
 public class SchedulerConfiguration {
-
+	//private final ENV = "default"
+	
 	@Bean
-    public LockProvider lockProvider(DataSource dataSource) {
+    public LockProvider lockProvider(DataSource dataSource) { //JedisPool jedisPool)  {
+		//return new JedisLockProvider(jedisPool, ENV);
         return new JdbcTemplateLockProvider(dataSource, "shedlock");
     }
 	

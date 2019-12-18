@@ -1,5 +1,7 @@
 package it.visualsoftware.notificator;
 
+import java.time.LocalDateTime;
+import java.time.Month;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,23 +11,21 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-//import com.fasterxml.jackson.core.JsonProcessingException;
-//import com.fasterxml.jackson.databind.JsonMappingException;
-//
 //import it.visualsoftware.notificator.RestTemplate.RestTemplateService;
 import it.visualsoftware.notificator.dao.NotificationDao;
 import it.visualsoftware.notificator.models.Notification;
 import it.visualsoftware.notificator.redis.RedisHash;
+import it.visualsoftware.notificator.redis.RedisMessagePublisher;
 //import it.visualsoftware.notificator.redis.RedisMessageListener;
-//import it.visualsoftware.notificator.sms.Sms;
 import lombok.extern.slf4j.Slf4j;
-//import it.visual.mailutils.impl.MailSender;
 
 @Slf4j
 @RestController
 @RequestMapping("/api")
 public class NotificatorController {
 	private final NotificationDao repository;
+	@Autowired
+	private RedisMessagePublisher publisher;
 	@Autowired
 	private RedisHash hash;
 								//private MailSender mail;
@@ -49,10 +49,17 @@ public class NotificatorController {
 	
 	//TODO stampare messaggio
 	@GetMapping("/message")
-	public void queue(){
+	public void queue(@RequestBody String min){
 		log.info("info");
 		//hash.get("expiring");
-		hash.flush("pari");
+		for (int i=0; i<5; i++) {
+			log.info("pubblico " +i);
+			Notification x = new Notification("luca"+i, "demo"+i,LocalDateTime.of(2019, Month.DECEMBER, 18, 18,Integer.valueOf(min)),"inserito"+i,"content"+i,"url"+i,"token");
+			log.info("publish"+x);
+			publisher.publish(x);
+		}
+		//int i = 0000;
+		
 		//RedisMessageListener.jedis.zcard("queue");
 		//return RedisMessageListener.messageQueue.poll();
 //		log.info("dim : "+RedisMessageListener.messageQueue.size());

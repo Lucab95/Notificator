@@ -44,7 +44,6 @@ public class RedisHash {
 			return new ArrayList<Notification>();
 		}
 		List<Notification> minuteList = mapper.convertValue(map, new TypeReference<List<Notification>>(){});
-		
 		return minuteList;
 	}
 	

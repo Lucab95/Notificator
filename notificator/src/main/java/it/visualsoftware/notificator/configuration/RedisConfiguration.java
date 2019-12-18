@@ -19,17 +19,18 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import it.visualsoftware.notificator.RestTemplate.RestTemplateService;
 import it.visualsoftware.notificator.redis.MessagePublisher;
 import it.visualsoftware.notificator.redis.RedisHash;
+import it.visualsoftware.notificator.redis.RedisMessageListenerEvictor;
 import it.visualsoftware.notificator.redis.RedisMessageListener;
 import it.visualsoftware.notificator.redis.RedisMessagePublisher;
 import it.visualsoftware.notificator.redis.RedisQueueEx;
 
 @Configuration
 public class RedisConfiguration {
-	private final String broadChannel;
+	private final String evictorChannel;
 	private ObjectMapper mapper;
 	private final RestTemplateService template;
-	public RedisConfiguration(@Value("${channel.broad}") String broadChannel, ObjectMapper mapper, RestTemplateService template) {
-		this.broadChannel=broadChannel;
+	public RedisConfiguration(@Value("${channel.evictor}") String evictorChannel, ObjectMapper mapper, RestTemplateService template) {
+		this.evictorChannel=evictorChannel;
 		this.mapper=mapper;
 		this.template=template;
 	}
@@ -56,22 +57,28 @@ public class RedisConfiguration {
 		return hash;
 	}
 	
+//	@Bean
+//	MessageListenerAdapter messageListener(RedisQueueEx queue) {
+//		queue.listener(mapper,template);
+//	    return new MessageListenerAdapter(new RedisMessageListener(mapper,queue));
+//	}
 	@Bean
-	MessageListenerAdapter messageListener(RedisQueueEx queue) {
+	MessageListenerAdapter messageListener(RedisQueueEx queue,RedisHash hash) {
 		queue.listener(mapper,template);
-	    return new MessageListenerAdapter(new RedisMessageListener(mapper,queue));
+	    return new MessageListenerAdapter(new RedisMessageListenerEvictor(mapper,hash));
 	}
 	
 	
 	@Bean
-    RedisMessageListenerContainer redisContainer(JedisConnectionFactory jedisConnectionFactory,RedisQueueEx queue) {
+    RedisMessageListenerContainer redisContainer(JedisConnectionFactory jedisConnectionFactory,RedisQueueEx queue,RedisHash hash) {
 		RedisMessageListenerContainer container 
 	      = new RedisMessageListenerContainer();
 	    container.setConnectionFactory(jedisConnectionFactory);	
-	    container.addMessageListener(messageListener(queue), topic());
+	    //container.addMessageListener(messageListener(queue), topic());
+	    container.addMessageListener(messageListener(queue,hash),topic());
 	    return container;
     }
-	
+
 
     @Bean
     MessagePublisher redisPublisher(RedisTemplate <String,Object> redisTemplate) {
@@ -81,7 +88,7 @@ public class RedisConfiguration {
     
     @Bean
     ChannelTopic topic() {
-        return new ChannelTopic(broadChannel);
+        return new ChannelTopic(evictorChannel);
     }
     
     
