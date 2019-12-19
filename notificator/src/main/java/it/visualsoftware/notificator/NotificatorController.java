@@ -54,7 +54,7 @@ public class NotificatorController {
 		//hash.get("expiring");
 		for (int i=0; i<5; i++) {
 			log.info("pubblico " +i);
-			Notification x = new Notification("luca"+i, "demo"+i,LocalDateTime.of(2019, Month.DECEMBER, 18, 18,Integer.valueOf(min)),"inserito"+i,"content"+i,"url"+i,"token");
+			Notification x = new Notification("luca"+i, "demo"+i,LocalDateTime.of(2019, Month.DECEMBER, 18, 10,Integer.valueOf(min)),"inserito"+i,"content"+i,"url"+i,"token");
 			log.info("publish"+x);
 			publisher.publish(x);
 		}
