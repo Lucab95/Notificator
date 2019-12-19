@@ -46,6 +46,7 @@ public class RedisMessageListenerEvictor implements MessageListener{
 				//List<Notification> inThisMin = hash.get(hashName,min);
 				set.add(notify);
 				log.info("uff"+set.members());
+				
 //				log.info("contains:{}",inThisMin.toString());
 				
 				//put in set
