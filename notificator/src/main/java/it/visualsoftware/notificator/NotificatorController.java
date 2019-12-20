@@ -53,18 +53,17 @@ public class NotificatorController {
 	@GetMapping("/message")
 	public void queue(@RequestBody String chann){
 		int ora= Calendar.getInstance().get(Calendar.HOUR);
-		int min = 46;
+		int min = 7;
 		
 		log.info("info");
 		//hash.get("expiring");
 		for (int i=0; i<5; i++) {
 			log.info("pubblico " +i);
-			Notification x = new Notification("luca"+i, "demo"+i,LocalDateTime.of(2019, Month.DECEMBER, 18, ora,min),"inserito"+i,"content"+i,"url"+i,"token");
+			Notification x = new Notification("luca"+i, "demo"+i,LocalDateTime.of(2019, Month.DECEMBER, 18, 15,min),"inserito"+i,"content"+i,"url"+i,"token");
 			log.info("publish"+x);
 			publisher.publish(x,new ChannelTopic(chann));
 		}
 		//int i = 0000;
-		
 		//RedisMessageListener.jedis.zcard("queue");
 		//return RedisMessageListener.messageQueue.poll();
 //		log.info("dim : "+RedisMessageListener.messageQueue.size());

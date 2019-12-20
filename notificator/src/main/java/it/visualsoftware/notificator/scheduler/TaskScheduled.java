@@ -49,7 +49,6 @@ public class TaskScheduled {
 	 * @throws InterruptedException
 	 * @throws JsonProcessingException
 	 */
-	//TODO PREVEDERE COSA SUCCEDE QUANDO MANCANO 10 MINUTI E QUINDI ANDREBBERO PERSI
 	@Async
 	@Scheduled(cron ="${cron.string.hour}")
 	@SchedulerLock(name = "TaskScheduler_nextHour", lockAtLeastForString = "PT5S", lockAtMostForString = "PT40S")

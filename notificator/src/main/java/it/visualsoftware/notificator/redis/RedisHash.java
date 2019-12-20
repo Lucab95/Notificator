@@ -2,8 +2,10 @@ package it.visualsoftware.notificator.redis;
 
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 //import java.util.Map;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -48,5 +50,18 @@ public class RedisHash {
 	public void flush(String hashName) {
 		log.info("deleted"+hashName);
 		redis.delete(hashName);
+	}
+
+	public void putSet(String hashName, int min, RedisSet set) {
+		List<Notification> x = get(hashName,min);
+		Set<Object> y = set.members();
+		Iterator<Object> value = y.iterator();
+		while(value.hasNext()) {
+			Notification obj = mapper.convertValue(value.next(), Notification.class);
+			if (!(x.contains(obj))){
+			x.add(obj);
+		}
+		}
+		put(hashName,min,x);
 	}
 }

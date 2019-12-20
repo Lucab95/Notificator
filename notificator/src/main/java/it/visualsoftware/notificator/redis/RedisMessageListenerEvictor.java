@@ -41,16 +41,25 @@ public class RedisMessageListenerEvictor implements MessageListener{
 			LocalDateTime now= LocalDateTime.now().plusMinutes(10);
 			LocalDateTime eventTime = notify.getEndDate();
 			log.info("\n ora di adesso {} e dell'evento {} \n", now, eventTime);
-			
 			if ((eventTime.getHour()==now.getHour())&&(eventTime.getMinute()>now.getMinute())){
+//				switch (notify.getTenant()){
+//					case "lol":
+//						return "x" ;
+//					case "modify":
+//						return "lol";
+//				}
+			
+			
 //				log.info("da getire");
 				int min = eventTime.getMinute();
-				List<Notification> x = hash.get(hashName,min);
-				x.add(notify);
-				log.info("lista" + x);
-				hash.put(hashName, min, x);
+				//List<Notification> x = hash.get(hashName,min);
+				//x.add(notify);
+				//log.info("lista" + x);
+				//hash.put(hashName, min, x);
 
 				set.add(notify);
+				hash.putSet(hashName, min, set);
+				set.remove(notify);
 				log.info("uff"+set.members());
 				
 //				log.info("contains:{}",inThisMin.toString());

@@ -28,5 +28,8 @@ public class RedisSet {
 	public Set<Object> members() {
 		return redis.opsForSet().members(setName);
 	}
+	public void remove(Notification notify) {
+		log.info(""+redis.opsForSet().remove(setName,notify));	
+		}
 	
 }

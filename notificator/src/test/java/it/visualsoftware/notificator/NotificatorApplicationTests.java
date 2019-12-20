@@ -39,36 +39,36 @@ class NotificatorApplicationTests {
 	}*/
 
 	
-//	@Test
-//	public void populate() throws Exception{
-//		long millis = new Date().getTime();
-//		for (int i=3000;i<4000;i++) {
-//		repository.insertNotification(new Notification("luca"+i, "demo"+i,
-//								LocalDateTime.ofInstant(Instant.ofEpochMilli(millis), TimeZone.getDefault().toZoneId()),
-//								"prova"+i,"content"+i,"url"+i,"token" ));
-//		millis=millis+new Random().nextInt(240000)+120000; //from 2 min to 7
-//		/*mvc.perform(MockMvcRequestBuilders
-//			      .post("/create")
-//			      .content(asJsonString(new Notification("luca", "demo4", new NotifyContent("prova4","content","url"))))
-//			      .contentType(MediaType.APPLICATION_JSON)
-//			      .accept(MediaType.APPLICATION_JSON))
-//			      .andExpect(status().isCreated());
-//		*/
-//		
-//		}
-//		log.info("inserimento completato");
-//
-//	}
-	
 	@Test
-	public void getat5() {
-		int i = 8487;
-		Notification x = new Notification("luca"+i, "demo"+i,LocalDateTime.of(2019, Month.DECEMBER, 18, 12,8),"prova"+i,"content"+i,"url"+i,"token");
-		log.info("publish"+x);
-		publisher.publish(x);
+	public void populate() throws Exception{
+		long millis = new Date().getTime();
+		for (int i=3000;i<4000;i++) {
+		repository.insertNotification(new Notification("luca"+i, "demo"+i,
+								LocalDateTime.ofInstant(Instant.ofEpochMilli(millis), TimeZone.getDefault().toZoneId()),
+								"prova"+i,"content"+i,"url"+i,"token" ));
+		millis=millis+new Random().nextInt(240000)+120000; //from 2 min to 7
+		/*mvc.perform(MockMvcRequestBuilders
+			      .post("/create")
+			      .content(asJsonString(new Notification("luca", "demo4", new NotifyContent("prova4","content","url"))))
+			      .contentType(MediaType.APPLICATION_JSON)
+			      .accept(MediaType.APPLICATION_JSON))
+			      .andExpect(status().isCreated());
+		*/
 		
-		//List<Notification> x = repository.nextMinutes(300000);
-		//log.info("print \n" +x.toString());
+		}
+		log.info("inserimento completato");
+
 	}
+//	
+//	@Test
+//	public void getat5() {
+//		int i = 8487;
+//		Notification x = new Notification("luca"+i, "demo"+i,LocalDateTime.of(2019, Month.DECEMBER, 18, 12,8),"prova"+i,"content"+i,"url"+i,"token");
+//		log.info("publish"+x);
+//		publisher.publish(x);
+//		
+//		//List<Notification> x = repository.nextMinutes(300000);
+//		//log.info("print \n" +x.toString());
+//	}
 
 }
