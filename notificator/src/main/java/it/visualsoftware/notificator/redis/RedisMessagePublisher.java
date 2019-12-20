@@ -32,7 +32,7 @@ public class RedisMessagePublisher implements MessagePublisher {
         redisTemplate.convertAndSend(topic.getTopic(), message);
         log.info("canale : {} - {} ", topic.getTopic(), message);
     }
-    public void publish(String message, ChannelTopic topic) {
+    public void publish(Notification message, ChannelTopic topic) {
         redisTemplate.convertAndSend(topic.getTopic(), message);
         log.info("canale : {} - {} ", topic.getTopic(), message);
     }

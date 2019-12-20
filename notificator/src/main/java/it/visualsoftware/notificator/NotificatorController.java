@@ -2,9 +2,11 @@ package it.visualsoftware.notificator;
 
 import java.time.LocalDateTime;
 import java.time.Month;
+import java.util.Calendar;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -49,14 +51,17 @@ public class NotificatorController {
 	
 	//TODO stampare messaggio
 	@GetMapping("/message")
-	public void queue(@RequestBody String min){
+	public void queue(@RequestBody String chann){
+		int ora= Calendar.getInstance().get(Calendar.HOUR);
+		int min = 46;
+		
 		log.info("info");
 		//hash.get("expiring");
 		for (int i=0; i<5; i++) {
 			log.info("pubblico " +i);
-			Notification x = new Notification("luca"+i, "demo"+i,LocalDateTime.of(2019, Month.DECEMBER, 18, 10,Integer.valueOf(min)),"inserito"+i,"content"+i,"url"+i,"token");
+			Notification x = new Notification("luca"+i, "demo"+i,LocalDateTime.of(2019, Month.DECEMBER, 18, ora,min),"inserito"+i,"content"+i,"url"+i,"token");
 			log.info("publish"+x);
-			publisher.publish(x);
+			publisher.publish(x,new ChannelTopic(chann));
 		}
 		//int i = 0000;
 		

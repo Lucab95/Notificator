@@ -71,19 +71,19 @@ public class RedisConfiguration {
 //	    return new MessageListenerAdapter(new RedisMessageListener(mapper,queue));
 //	}
 	@Bean
-	MessageListenerAdapter messageListener(RedisQueueEx queue,RedisSet set) {//,RedisHash hash) {
+	MessageListenerAdapter messageListener(RedisQueueEx queue,RedisSet set ,RedisHash hash) {
 		queue.listener(mapper,template);
-	    return new MessageListenerAdapter(new RedisMessageListenerEvictor(mapper,set));
+	    return new MessageListenerAdapter(new RedisMessageListenerEvictor(mapper,set, hash));
 	}
 	
 	
 	@Bean
-    RedisMessageListenerContainer redisContainer(JedisConnectionFactory jedisConnectionFactory,RedisQueueEx queue,RedisSet set) {
+    RedisMessageListenerContainer redisContainer(JedisConnectionFactory jedisConnectionFactory,RedisQueueEx queue,RedisSet set,RedisHash hash) {
 		RedisMessageListenerContainer container 
 	      = new RedisMessageListenerContainer();
 	    container.setConnectionFactory(jedisConnectionFactory);	
 	    //container.addMessageListener(messageListener(queue), topic());
-	    container.addMessageListener(messageListener(queue,set),topic());
+	    container.addMessageListener(messageListener(queue,set,hash),topic());
 	    return container;
     }
 

@@ -19,14 +19,14 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class RedisMessageListenerEvictor implements MessageListener{
 	private  final ObjectMapper mapper;
-//	private RedisHash hash;
+	private RedisHash hash;
 //	private final String hashName;
 	private RedisSet set;
 	
-	public RedisMessageListenerEvictor(ObjectMapper mapper, RedisSet set) {
+	public RedisMessageListenerEvictor(ObjectMapper mapper, RedisSet set, RedisHash hash) {
 		this.mapper=mapper;
 		this.set=set;
-//		this.hash=hash;
+		this.hash=hash;
 //		this.hashName = "pari";
 	}
 	
@@ -34,7 +34,9 @@ public class RedisMessageListenerEvictor implements MessageListener{
 	@Override
 	public void onMessage(Message message, byte[] pattern) {
 		//ora di adesso, se entro prossima ora -> modifica altrimenti nulla
+		String hashName = "pari";
 		try {
+			
 			Notification notify = mapper.readValue(message.getBody(), Notification.class);
 			LocalDateTime now= LocalDateTime.now().plusMinutes(10);
 			LocalDateTime eventTime = notify.getEndDate();
@@ -43,7 +45,11 @@ public class RedisMessageListenerEvictor implements MessageListener{
 			if ((eventTime.getHour()==now.getHour())&&(eventTime.getMinute()>now.getMinute())){
 //				log.info("da getire");
 				int min = eventTime.getMinute();
-				//List<Notification> inThisMin = hash.get(hashName,min);
+				List<Notification> x = hash.get(hashName,min);
+				x.add(notify);
+				log.info("lista" + x);
+				hash.put(hashName, min, x);
+
 				set.add(notify);
 				log.info("uff"+set.members());
 				
@@ -60,6 +66,9 @@ public class RedisMessageListenerEvictor implements MessageListener{
 //					log.info("list "+ hash.get(hashName, min));
 //					log.info("dopo inserimento contains:{}",inThisMin.contains(notify));
 //				}
+				
+				
+				
 			}
 //			else {
 //				log.info("scorri");

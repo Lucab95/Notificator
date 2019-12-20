@@ -27,12 +27,10 @@ public class RedisHash {
 		this.mapper=mapper;
 	}
 	
-	public void put(String hashName, int key , List<Notification> notify) {
-		
+	public void put(String hashName, int key , List<Notification> inThisMin) {
 		log.info("add scheduled notification");
-		redis.opsForHash().put(hashName, String.valueOf(key), notify);
+		redis.opsForHash().put(hashName, String.valueOf(key), inThisMin);
 //		log.info("redis" + redis.opsForHash().get(hashName, "dog"));
-
 		}
 	
 	public List<Notification> get(String hashName, int key) {

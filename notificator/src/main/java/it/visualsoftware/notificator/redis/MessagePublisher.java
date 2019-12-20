@@ -6,5 +6,5 @@ import it.visualsoftware.notificator.models.Notification;
 
 public interface MessagePublisher {
 	void publish(Notification message);
-	void publish(String message, ChannelTopic topic);
+	void publish(Notification message, ChannelTopic topic);
 }
