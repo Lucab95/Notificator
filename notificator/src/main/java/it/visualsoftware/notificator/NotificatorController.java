@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.time.Month;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Random;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.listener.ChannelTopic;
@@ -18,6 +19,7 @@ import it.visualsoftware.notificator.dao.NotificationDao;
 import it.visualsoftware.notificator.models.Notification;
 import it.visualsoftware.notificator.redis.RedisHash;
 import it.visualsoftware.notificator.redis.RedisMessagePublisher;
+import it.visualsoftware.notificator.redis.RedisQueueEvents;
 //import it.visualsoftware.notificator.redis.RedisMessageListener;
 import lombok.extern.slf4j.Slf4j;
 
@@ -30,6 +32,8 @@ public class NotificatorController {
 	private RedisMessagePublisher publisher;
 	@Autowired
 	private RedisHash hash;
+	@Autowired
+	private RedisQueueEvents queue;
 								//private MailSender mail;
 	public NotificatorController(NotificationDao repo) {
 //		this.template = template;
@@ -51,17 +55,21 @@ public class NotificatorController {
 	
 	//TODO stampare messaggio
 	@GetMapping("/message")
-	public void queue(@RequestBody String chann){
+	public void queue(@RequestBody String chann) throws InterruptedException{
+		
 		int ora= Calendar.getInstance().get(Calendar.HOUR);
-		int min = 7;
+		int min = 27;
 		
 		log.info("info");
 		//hash.get("expiring");
-		for (int i=0; i<5; i++) {
+		for (int i=0; i<10; i++) {
+			
 			log.info("pubblico " +i);
-			Notification x = new Notification("luca"+i, "demo"+i,LocalDateTime.of(2019, Month.DECEMBER, 18, 15,min),"inserito"+i,"content"+i,"url"+i,"token");
+			Notification x = new Notification("luca"+i, "demo"+i,LocalDateTime.of(2019, Month.DECEMBER, 18, 18,min),"inserito"+i,"content"+i,"url"+i,"token");
 			log.info("publish"+x);
-			publisher.publish(x,new ChannelTopic(chann));
+			
+			queue.push(x);
+			//publisher.publish(x,new ChannelTopic(chann));
 		}
 		//int i = 0000;
 		//RedisMessageListener.jedis.zcard("queue");

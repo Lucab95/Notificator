@@ -31,7 +31,7 @@ class NotificatorApplicationTests {
 	@Autowired
 	private NotificationDao repository;
 	
-	private RedisMessagePublisher publisher;
+//	private RedisMessagePublisher publisher;
 	
 	/*public NotificatorApplicationTests(NotificationDao repository) {
 		// TODO Auto-generated constructor stub

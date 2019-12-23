@@ -52,16 +52,16 @@ public class RedisHash {
 		redis.delete(hashName);
 	}
 
-	public void putSet(String hashName, int min, RedisSet set) {
-		List<Notification> x = get(hashName,min);
-		Set<Object> y = set.members();
-		Iterator<Object> value = y.iterator();
-		while(value.hasNext()) {
-			Notification obj = mapper.convertValue(value.next(), Notification.class);
-			if (!(x.contains(obj))){
-			x.add(obj);
-		}
-		}
-		put(hashName,min,x);
-	}
+//	public void putSet(String hashName, int min, RedisSet set) {
+//		List<Notification> x = get(hashName,min);
+//		Set<Object> y = set.members();
+//		Iterator<Object> value = y.iterator();
+//		while(value.hasNext()) {
+//			Notification obj = mapper.convertValue(value.next(), Notification.class);
+//			if (!(x.contains(obj))){
+//			x.add(obj);
+//		}
+//		}
+//		put(hashName,min,x);
+//	}
 }

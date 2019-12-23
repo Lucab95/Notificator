@@ -21,11 +21,11 @@ public class RedisMessageListenerEvictor implements MessageListener{
 	private  final ObjectMapper mapper;
 	private RedisHash hash;
 //	private final String hashName;
-	private RedisSet set;
+	//private RedisSet set;
 	
-	public RedisMessageListenerEvictor(ObjectMapper mapper, RedisSet set, RedisHash hash) {
+	public RedisMessageListenerEvictor(ObjectMapper mapper/*, RedisSet set*/, RedisHash hash) {
 		this.mapper=mapper;
-		this.set=set;
+		//this.set=set;
 		this.hash=hash;
 //		this.hashName = "pari";
 	}
@@ -57,11 +57,11 @@ public class RedisMessageListenerEvictor implements MessageListener{
 				//log.info("lista" + x);
 				//hash.put(hashName, min, x);
 
-				set.add(notify);
+				/*set.add(notify);
 				hash.putSet(hashName, min, set);
 				set.remove(notify);
 				log.info("uff"+set.members());
-				
+				*/
 //				log.info("contains:{}",inThisMin.toString());
 				
 				//put in set
