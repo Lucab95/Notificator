@@ -1,0 +1,22 @@
+{"properties": [
+  {
+    "name": "cron.string.hour",
+    "type": "java.lang.String",
+    "description": "ogni ora dalle 7:50 alle 18:50"
+  },
+  {
+    "name": "cron.string.10min",
+    "type": "java.lang.String",
+    "description": "ogni minuto dalle 7:50 alle 7:59"
+  },
+  {
+    "name": "cron.string.min",
+    "type": "java.lang.String",
+    "description": "Ogni minuto dalle 8:00 alle 19:59"
+  },
+  {
+    "name": "expire.interval",
+    "type": "java.lang.String",
+    "description": "intervallo di minuti per la query dal db'"
+  }
+]}

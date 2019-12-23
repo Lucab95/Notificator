@@ -21,7 +21,7 @@ import it.visualsoftware.notificator.redis.MessagePublisher;
 import it.visualsoftware.notificator.redis.RedisHash;
 import it.visualsoftware.notificator.redis.RedisMessageListenerEvictor;
 import it.visualsoftware.notificator.redis.RedisMessagePublisher;
-import it.visualsoftware.notificator.redis.RedisQueueEvents;
+import it.visualsoftware.notificator.redis.RedisQueueEvictor;
 import it.visualsoftware.notificator.redis.RedisQueueEx;
 //import it.visualsoftware.notificator.redis.RedisSet;
 
@@ -53,8 +53,8 @@ public class RedisConfiguration {
 		return queue;
 	}
 	@Bean 
-	RedisQueueEvents getQueueEvents(RedisTemplate <String,Object> redisTemplate) {
-		RedisQueueEvents queueEvents = new RedisQueueEvents(redisTemplate,"events_queue");
+	RedisQueueEvictor getQueueEvents(RedisTemplate <String,Object> redisTemplate) {
+		RedisQueueEvictor queueEvents = new RedisQueueEvictor(redisTemplate,"events_queue");
 		return queueEvents;
 	}
 	@Bean
@@ -76,6 +76,7 @@ public class RedisConfiguration {
 //		queue.listener(mapper,template);
 //	    return new MessageListenerAdapter(new RedisMessageListener(mapper,queue));
 //	}
+	
 	@Bean
 	MessageListenerAdapter messageListener(RedisQueueEx queue,RedisHash hash) {
 		
@@ -85,7 +86,7 @@ public class RedisConfiguration {
 	
 	@Bean
     RedisMessageListenerContainer redisContainer(JedisConnectionFactory jedisConnectionFactory,RedisQueueEx queue,
-    		RedisHash hash,RedisQueueEvents queueEvents ) {
+    		RedisHash hash,RedisQueueEvictor queueEvents ){
 		RedisMessageListenerContainer container = new RedisMessageListenerContainer();
 	    container.setConnectionFactory(jedisConnectionFactory);	
 	    //container.addMessageListener(messageListener(queue), topic());

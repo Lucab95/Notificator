@@ -2,10 +2,12 @@ package it.visualsoftware.notificator.redis;
 
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 //import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -21,7 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class RedisHash {
 	protected final RedisTemplate<String,Object> redis;
-	protected final ObjectMapper mapper; 
+	protected final ObjectMapper mapper;
 	
 	
 	public RedisHash(RedisTemplate<String,Object> redis, ObjectMapper mapper ) {
@@ -29,24 +31,96 @@ public class RedisHash {
 		this.mapper=mapper;
 	}
 	
-	public void put(String hashName, int key , List<Notification> inThisMin) {
-		log.info("add scheduled notification");
-		redis.opsForHash().put(hashName, String.valueOf(key), inThisMin);
-//		log.info("redis" + redis.opsForHash().get(hashName, "dog"));
+	/**
+	 * Inserisce la notifica nella struttura per la schedulazione già esistente
+	 * @param hashName
+	 * @param key
+	 * @param notify
+	 */
+	public void add(String hashName, String key , Notification notify) {
+		log.info("lock");
+		redis.opsForList().rightPop("lock",5, TimeUnit.SECONDS);
+//		while (redis.opsForList().size("lock")>0) {
+//			redis.opsForList().rightPop("lock");
+//		}
+		List<Notification> inThisMin;
+		
+		Object map = redis.opsForHash().get(hashName,key);
+		if (map!=null) {
+			inThisMin= mapper.convertValue(map, new TypeReference<List<Notification>>(){});
+		} else {
+			inThisMin= new ArrayList<Notification>();
 		}
+		if (!(inThisMin.contains(notify))) {
+			inThisMin.add(notify);
+			redis.opsForHash().put(hashName, key, inThisMin);
+				log.info("oldlist  {} ",inThisMin.size());
+			log.info("notification {} scheduled for min {} ",notify.getTitle(), key);
+		}else {
+			log.info("già presente");
+		}
+		redis.opsForList().leftPush("lock", "1");
+	}
 	
-	public List<Notification> get(String hashName, int key) {
+	/**
+	 * A seguito di un annullamento, rimuove la notifica già schedulata 
+	 * @param hashName
+	 * @param key
+	 * @param notify
+	 */
+	public void remove(String hashName, String key , Notification notify) {
+		log.info("lock");
+		redis.opsForList().rightPop("lock",5, TimeUnit.SECONDS);
+		List<Notification> inThisMin;
+		Object map = redis.opsForHash().get(hashName,key);
+		if (map!=null) {
+			inThisMin= mapper.convertValue(map, new TypeReference<List<Notification>>(){});
+			log.info("object removed {}",inThisMin.remove(notify));
+			redis.opsForHash().put(hashName, key, inThisMin);
+		}
+		
+		redis.opsForList().leftPush("lock", "1");
+		log.info("unlock");
+	}
+	
+	/**
+	 *  Nel caso di rischedulazione, toglie la notifica dalla schedulazione gia fatta. 
+	 *  Se è ancora nella stessa fascia oraria, lo reinserisce
+	 * @param hashName
+	 * @param key
+	 * @param notifyOld
+	 * @param notifyNew
+	 */
+	public void reSchedule(String hashName, String key, Notification notifyOld, Notification notifyNew) {
+		log.info("lock");
+		redis.opsForList().rightPop("lock",5, TimeUnit.SECONDS);
+		List<Notification> inThisMin;
+		Object map = redis.opsForHash().get(hashName,key);
+		if (map!=null) {
+			inThisMin= mapper.convertValue(map, new TypeReference<List<Notification>>(){});
+			log.info("object removed {}",inThisMin.remove(notifyOld));
+			//se notifyNew.getEndDate in questa fascia oraria
+			if (notifyOld.getEndDate().getHour() == notifyNew.getEndDate().getHour()) {
+				inThisMin.add(notifyNew);
+			}
+			redis.opsForHash().put(hashName, key, inThisMin);
+		}
+		redis.opsForList().leftPush("lock", "1");
+		log.info("unlock");
+	}
+	//la get viene utilizzata per ritornare la lista con tutte le notifiche da inviare in questo momento
+	public List<Notification> get(String hashName, String key) {
 		log.info("try get");
-		//BoundHashOperations<String, String, Notification> operations = redis.boundHashOps(hashName);
-		Object map = redis.opsForHash().get(hashName,String.valueOf(key));
+		Object map = redis.opsForHash().get(hashName,key);
 		if (map==null) {
 			log.info("no keys found");
 			return new ArrayList<Notification>();
 		}
 		List<Notification> minuteList = mapper.convertValue(map, new TypeReference<List<Notification>>(){});
-		return minuteList;
+		return Collections.unmodifiableList(minuteList);
 	}
 	
+	//svuota la lista, prima di ripopolarla per la prossima ora 
 	public void flush(String hashName) {
 		log.info("deleted"+hashName);
 		redis.delete(hashName);

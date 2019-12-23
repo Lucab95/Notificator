@@ -41,7 +41,7 @@ public class RedisMessageListenerEvictor implements MessageListener{
 			LocalDateTime now= LocalDateTime.now().plusMinutes(10);
 			LocalDateTime eventTime = notify.getEndDate();
 			log.info("\n ora di adesso {} e dell'evento {} \n", now, eventTime);
-			if ((eventTime.getHour()==now.getHour())&&(eventTime.getMinute()>now.getMinute())){
+			if ((eventTime.getHour()==now.getHour())){
 //				switch (notify.getTenant()){
 //					case "lol":
 //						return "x" ;
@@ -49,7 +49,7 @@ public class RedisMessageListenerEvictor implements MessageListener{
 //						return "lol";
 //				}
 			
-			
+				
 //				log.info("da getire");
 				int min = eventTime.getMinute();
 				//List<Notification> x = hash.get(hashName,min);
@@ -57,11 +57,10 @@ public class RedisMessageListenerEvictor implements MessageListener{
 				//log.info("lista" + x);
 				//hash.put(hashName, min, x);
 
-				/*set.add(notify);
-				hash.putSet(hashName, min, set);
-				set.remove(notify);
-				log.info("uff"+set.members());
-				*/
+				//set.add(notify);
+				hash.add(hashName, String.valueOf(min), notify);
+//				set.remove(notify);
+//				log.info("uff"+set.members());
 //				log.info("contains:{}",inThisMin.toString());
 				
 				//put in set

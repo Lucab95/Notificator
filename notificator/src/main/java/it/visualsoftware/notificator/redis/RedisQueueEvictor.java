@@ -19,12 +19,12 @@ import lombok.extern.slf4j.Slf4j;
 
 //********INVIA NOTIFICHE********
 @Slf4j
-public class RedisQueueEvents extends RedisQueue<Notification>{
+public class RedisQueueEvictor extends RedisQueue<Notification>{
 	@Autowired
 	RedisHash hash;
 	
 	
-	public RedisQueueEvents(RedisTemplate<String,Object> redis,String queue) {
+	public RedisQueueEvictor(RedisTemplate<String,Object> redis,String queue) {
 		super(redis, queue);
 	}
 	
@@ -38,9 +38,10 @@ public class RedisQueueEvents extends RedisQueue<Notification>{
 	 * listener per eseguire gli eventi
 	 * @param mapper
 	 * @param template
+	 * @throws InterruptedException 
 	 */
 	@Async
-	public void listener(ObjectMapper mapper, RestTemplateService template) {
+	public void listener(ObjectMapper mapper, RestTemplateService template){
 		log.info("Open listener on queue: {}",queueName);
 		ListOperations<String, Object> operations=redis.opsForList();//rightPopAndLeftPush(queueName, "", timeout, unit)boundListOps();
 		while (true) {
@@ -54,10 +55,8 @@ public class RedisQueueEvents extends RedisQueue<Notification>{
 				log.info("\n ora di adesso {} e dell'evento {} \n", now, eventTime);
 				if ((eventTime.getHour()==now.getHour())&&(eventTime.getMinute()>now.getMinute())){
 					int min = eventTime.getMinute();
-						//transazione
-						List<Notification> inThisMin = hash.get("pari",min);
-						inThisMin.add(notify);
-						hash.put("pari", min, inThisMin);
+//						List<Notification> inThisMin =
+						hash.add("pari",String.valueOf(min),notify);
 						//end
 					//x.add(notify);
 //					switch (notify.getTenant()){
@@ -66,9 +65,11 @@ public class RedisQueueEvents extends RedisQueue<Notification>{
 //					case "modify":
 //						return "lol";
 //				}
-					
 				}
+			}else {
+				log.info("job null");
 			}
+			
 		}
 	}
 }

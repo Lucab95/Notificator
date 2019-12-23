@@ -53,7 +53,7 @@ public class TaskScheduled {
 	@Scheduled(cron ="${cron.string.hour}")
 	@SchedulerLock(name = "TaskScheduler_nextHour", lockAtLeastForString = "PT5S", lockAtMostForString = "PT40S")
 	public List<Notification> nextHour() throws InterruptedException, JsonProcessingException {
-		int currentMin = 0;
+		//int currentMin = 0;
 		int hour = Calendar.getInstance().get(Calendar.HOUR)+1;
 		String hashName = (hour%2==0) ?  "pari" : "pari";
 		hash.flush(hashName);
@@ -64,17 +64,21 @@ public class TaskScheduled {
 		
 		List<Notification> inThisMin = new ArrayList<Notification>();
 		for(Notification notify : endSoon) {//non esegue l'ultimo
-			int min = notify.getMin();
-			log.info("min {} e list {} ", currentMin, inThisMin);//errore
-			if(min!=currentMin){
-				//minuto diverso, invio la lista e la svuoto per il minuto successivo
-				hash.put(hashName,currentMin,inThisMin);
-				inThisMin.clear();
-				currentMin=min;
-			}
-			inThisMin.add(notify);
+			
+			String min = String.valueOf(notify.getMin());
+			log.info("min {} e list {} ", min, notify);//errore
+			hash.add(hashName,min,notify);
+			
 		}
-		hash.put(hashName,currentMin, inThisMin);
+//			if(min!=currentMin){
+////				minuto diverso,  aggiungo
+////				hash.add(hashName,currentMin,notify);
+////				inThisMin.clear();
+////				currentMin=min;
+////				}
+////			inThisMin.add(notify);
+//		}
+//		hash.add(hashName,currentMin, inThisMin);
 		
 //		hash.get("expiring");
 		return endSoon;
@@ -95,11 +99,10 @@ public class TaskScheduled {
 		int min = now.get(Calendar.MINUTE);
 		log.info("print {}:{}",hour,min);
 		String hashName = (hour%2==0) ?  "pari" : "pari";
-		List<Notification> inThisMin = hash.get(hashName, min);
+		List<Notification> inThisMin = hash.get(hashName, String.valueOf(min));
 		log.info("Lista :"+inThisMin.toString());
 		for (Notification notify : inThisMin )
 			redisQueue.push(notify);
-		
 		//return endSoon;
 	}
 }
