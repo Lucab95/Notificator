@@ -43,8 +43,9 @@ public class TaskScheduled {
 		this.redisQueue=redisQueue;
 		//this.redis=redis;
 	}
+	
 	/**
-	 * schedula la prossima ora,  ogni ora dalle 7:50 alle 18:50
+	 * schedula le notifiche della prossima ora,  ogni ora dalle 7:50 alle 18:50
 	 * @return
 	 * @throws InterruptedException
 	 * @throws JsonProcessingException
@@ -55,14 +56,14 @@ public class TaskScheduled {
 	public List<Notification> nextHour() throws InterruptedException, JsonProcessingException {
 		//int currentMin = 0;
 		int hour = Calendar.getInstance().get(Calendar.HOUR)+1;
-		String hashName = (hour%2==0) ?  "pari" : "pari";
+		//String hashName = (hour%2==0) ?  "pari" : "pari";
+		String hashName="pari";
 		hash.flush(hashName);
 		log.info("\n stampa  alle {} \n", Calendar.getInstance() );
 		
 		List<Notification> endSoon = repository.nextHour(interval);
 		log.info("get {}", endSoon.size());
-		
-		List<Notification> inThisMin = new ArrayList<Notification>();
+//		List<Notification> inThisMin = new ArrayList<Notification>();
 		for(Notification notify : endSoon) {//non esegue l'ultimo
 			
 			String min = String.valueOf(notify.getMin());
@@ -70,22 +71,13 @@ public class TaskScheduled {
 			hash.add(hashName,min,notify);
 			
 		}
-//			if(min!=currentMin){
-////				minuto diverso,  aggiungo
-////				hash.add(hashName,currentMin,notify);
-////				inThisMin.clear();
-////				currentMin=min;
-////				}
-////			inThisMin.add(notify);
-//		}
-//		hash.add(hashName,currentMin, inThisMin);
-		
-//		hash.get("expiring");
 		return endSoon;
 	}
 	
 	/**
-	 * ogni minuto invia le notifiche per il blocco successivo
+	 * Si occupa di incodare le notifiche da inviare minuto per minuto
+	 * @throws InterruptedException
+	 * @throws JsonProcessingException
 	 */
 	@Async
 	@Scheduled(cron="${cron.string.10min}")
@@ -98,7 +90,7 @@ public class TaskScheduled {
 		int hour = now.get(Calendar.HOUR);
 		int min = now.get(Calendar.MINUTE);
 		log.info("print {}:{}",hour,min);
-		String hashName = (hour%2==0) ?  "pari" : "pari";
+		String hashName = "pari";
 		List<Notification> inThisMin = hash.get(hashName, String.valueOf(min));
 		log.info("Lista :"+inThisMin.toString());
 		for (Notification notify : inThisMin )

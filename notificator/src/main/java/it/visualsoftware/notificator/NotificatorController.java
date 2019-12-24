@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import Exception.NotificationSentException;
 //import it.visualsoftware.notificator.RestTemplate.RestTemplateService;
 import it.visualsoftware.notificator.dao.NotificationDao;
 import it.visualsoftware.notificator.models.Notification;
@@ -112,7 +113,7 @@ public class NotificatorController {
 	}
 	
 	
-	@ExceptionHandler (value = {RuntimeException.class,Exception.class })
+	@ExceptionHandler (value = {RuntimeException.class,Exception.class,NotificationSentException.class})
 	@ResponseBody 
 	public ResponseEntity<ErrorInfo> handleUnknownError(HttpServletRequest req ,Exception ex){
 		String errorMessage = ex != null ? ex.getMessage() : "";

@@ -43,23 +43,28 @@ public class RedisHash {
 //		while (redis.opsForList().size("lock")>0) {
 //			redis.opsForList().rightPop("lock");
 //		}
-		List<Notification> inThisMin;
-		
-		Object map = redis.opsForHash().get(hashName,key);
-		if (map!=null) {
-			inThisMin= mapper.convertValue(map, new TypeReference<List<Notification>>(){});
-		} else {
-			inThisMin= new ArrayList<Notification>();
+		try {
+			List<Notification> inThisMin;
+			Object map = redis.opsForHash().get(hashName,key);
+			if (map!=null) {
+				inThisMin= mapper.convertValue(map, new TypeReference<List<Notification>>(){});
+			} else {
+				inThisMin= new ArrayList<Notification>();
+			}
+			if (!(inThisMin.contains(notify))) {
+				inThisMin.add(notify);
+				redis.opsForHash().put(hashName, key, inThisMin);
+					log.info("oldlist  {} ",inThisMin.size());
+				log.info("notification {} scheduled for min {} ",notify.getTitle(), key);
+			}else {
+				log.info("già presente");
+			}
+		}catch(Exception ex){
+			log.info("error on inserting notification");
+		}finally {
+			redis.opsForList().leftPush("lock", "1");
+			log.info("unlock");
 		}
-		if (!(inThisMin.contains(notify))) {
-			inThisMin.add(notify);
-			redis.opsForHash().put(hashName, key, inThisMin);
-				log.info("oldlist  {} ",inThisMin.size());
-			log.info("notification {} scheduled for min {} ",notify.getTitle(), key);
-		}else {
-			log.info("già presente");
-		}
-		redis.opsForList().leftPush("lock", "1");
 	}
 	
 	/**
@@ -71,16 +76,20 @@ public class RedisHash {
 	public void remove(String hashName, String key , Notification notify) {
 		log.info("lock");
 		redis.opsForList().rightPop("lock",5, TimeUnit.SECONDS);
-		List<Notification> inThisMin;
-		Object map = redis.opsForHash().get(hashName,key);
-		if (map!=null) {
-			inThisMin= mapper.convertValue(map, new TypeReference<List<Notification>>(){});
-			log.info("object removed {}",inThisMin.remove(notify));
-			redis.opsForHash().put(hashName, key, inThisMin);
+		try{
+			List<Notification> inThisMin;
+			Object map = redis.opsForHash().get(hashName,key);
+			if (map!=null) {
+				inThisMin= mapper.convertValue(map, new TypeReference<List<Notification>>(){});
+				log.info("object removed {}",inThisMin.remove(notify));
+				redis.opsForHash().put(hashName, key, inThisMin);
+			}
+		}catch(Exception ex){
+			log.info("error on removing scheduled notification");
+		}finally {
+			redis.opsForList().leftPush("lock", "1");
+			log.info("unlock");
 		}
-		
-		redis.opsForList().leftPush("lock", "1");
-		log.info("unlock");
 	}
 	
 	/**
@@ -94,20 +103,26 @@ public class RedisHash {
 	public void reSchedule(String hashName, String key, Notification notifyOld, Notification notifyNew) {
 		log.info("lock");
 		redis.opsForList().rightPop("lock",5, TimeUnit.SECONDS);
-		List<Notification> inThisMin;
-		Object map = redis.opsForHash().get(hashName,key);
-		if (map!=null) {
-			inThisMin= mapper.convertValue(map, new TypeReference<List<Notification>>(){});
-			log.info("object removed {}",inThisMin.remove(notifyOld));
-			//se notifyNew.getEndDate in questa fascia oraria
-			if (notifyOld.getEndDate().getHour() == notifyNew.getEndDate().getHour()) {
-				inThisMin.add(notifyNew);
+		try {
+			List<Notification> inThisMin;
+			Object map = redis.opsForHash().get(hashName,key);
+			if (map!=null) {
+				inThisMin= mapper.convertValue(map, new TypeReference<List<Notification>>(){});
+				log.info("object removed {}",inThisMin.remove(notifyOld));
+				//se notifyNew.getEndDate in questa fascia oraria
+				if (notifyOld.getEndDate().getHour() == notifyNew.getEndDate().getHour()) {
+					inThisMin.add(notifyNew);
+				}
+				redis.opsForHash().put(hashName, key, inThisMin);
 			}
-			redis.opsForHash().put(hashName, key, inThisMin);
+		}catch(Exception ex){
+			log.info("error on rescheduling");
+		}finally {
+			redis.opsForList().leftPush("lock", "1");
 		}
-		redis.opsForList().leftPush("lock", "1");
-		log.info("unlock");
+		
 	}
+	
 	//la get viene utilizzata per ritornare la lista con tutte le notifiche da inviare in questo momento
 	public List<Notification> get(String hashName, String key) {
 		log.info("try get");
