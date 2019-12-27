@@ -19,14 +19,14 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class RedisMessageListenerEvictor implements MessageListener{
 	private  final ObjectMapper mapper;
-	private RedisHash hash;
+	//private RedisHash hash;
 //	private final String hashName;
-	//private RedisSet set;
+	private RedisSet set;
 	
-	public RedisMessageListenerEvictor(ObjectMapper mapper/*, RedisSet set*/, RedisHash hash) {
+	public RedisMessageListenerEvictor(ObjectMapper mapper, RedisSet set) {//, RedisHash hash) {
 		this.mapper=mapper;
-		//this.set=set;
-		this.hash=hash;
+		this.set=set;
+		//this.hash=hash;
 //		this.hashName = "pari";
 	}
 	
@@ -34,53 +34,22 @@ public class RedisMessageListenerEvictor implements MessageListener{
 	@Override
 	public void onMessage(Message message, byte[] pattern) {
 		//ora di adesso, se entro prossima ora -> modifica altrimenti nulla
-		String hashName = "pari";
 		try {
-			
 			Notification notify = mapper.readValue(message.getBody(), Notification.class);
 			LocalDateTime now= LocalDateTime.now().plusMinutes(10);
 			LocalDateTime eventTime = notify.getEndDate();
 			log.info("\n ora di adesso {} e dell'evento {} \n", now, eventTime);
-			if ((eventTime.getHour()==now.getHour())){
-//				switch (notify.getTenant()){
-//					case "lol":
-//						return "x" ;
-//					case "modify":
-//						return "lol";
-//				}
-			
-				
-//				log.info("da getire");
-				int min = eventTime.getMinute();
+			if ((eventTime.getHour()==now.getHour())&&(eventTime.getMinute()>now.getMinute())){
 				//List<Notification> x = hash.get(hashName,min);
 				//x.add(notify);
 				//log.info("lista" + x);
 				//hash.put(hashName, min, x);
+				set.add(notify);
 
-				//set.add(notify);
-				hash.add(hashName, String.valueOf(min), notify);
-//				set.remove(notify);
-//				log.info("uff"+set.members());
-//				log.info("contains:{}",inThisMin.toString());
-				
-				//put in set
-//				if (inThisMin.contains(notify)) {
-//					log.info("salta inserimento");
-//				}else {
-//					notify.setTitle(LocalDateTime.now().toString());
-//					log.info("aggiunto {}",inThisMin.add(notify));
-//					hash.put(hashName, min, inThisMin);
-//					log.info("\n");
-//					log.info("list "+ hash.get(hashName, min));
-//					log.info("dopo inserimento contains:{}",inThisMin.contains(notify));
-//				}
-				
-				
-				
 			}
-//			else {
-//				log.info("scorri");
-//			}
+			else {
+				log.info("insert 0");
+			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

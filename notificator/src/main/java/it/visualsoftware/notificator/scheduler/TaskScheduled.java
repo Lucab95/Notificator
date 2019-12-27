@@ -5,18 +5,23 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import it.visualsoftware.notificator.dao.NotificationDao;
 import it.visualsoftware.notificator.models.Notification;
 import it.visualsoftware.notificator.redis.RedisHash;
 import it.visualsoftware.notificator.redis.RedisQueueEx;
+import it.visualsoftware.notificator.redis.RedisSet;
 import lombok.extern.slf4j.Slf4j;
 import net.javacrumbs.shedlock.core.SchedulerLock;
 
@@ -27,11 +32,14 @@ public class TaskScheduled {
 	private NotificationDao repository;
 	//@Autowired
 	//RedisMessagePublisher redis;
+	@Autowired
+	ObjectMapper mapper;
 	private RedisQueueEx redisQueue;
 	RedisHash hash;
+	@Autowired
+	RedisSet set;
 	@Value("${expire.interval}") 
 	long interval;
-	
 	
 	
 	
@@ -76,6 +84,7 @@ public class TaskScheduled {
 	
 	/**
 	 * Si occupa di incodare le notifiche da inviare minuto per minuto
+	 * opera anche sull'insieme delle modifiche e le inserisce nella programmazione futura 
 	 * @throws InterruptedException
 	 * @throws JsonProcessingException
 	 */
@@ -91,10 +100,23 @@ public class TaskScheduled {
 		int min = now.get(Calendar.MINUTE);
 		log.info("print {}:{}",hour,min);
 		String hashName = "pari";
+		log.info("size{}",set.size());
+		List<Object> map = set.popAll();
+		//valutazione per rimuovere/ togliere / modificare
+		log.info(""+map);
+		//dare precedenza
+		if (!(map.isEmpty())) {
+			List<Notification> changes = mapper.convertValue(map, new TypeReference<List<Notification>>(){});
+			for (Notification notify : changes){
+				String evMin= String.valueOf(notify.getEndDate().getMinute());
+				hash.add(hashName, evMin, notify);
+				log.info("notify {} , {}",notify);
+			}
+		}
+		//possibile eseguirlo dopo
 		List<Notification> inThisMin = hash.get(hashName, String.valueOf(min));
 		log.info("Lista :"+inThisMin.toString());
 		for (Notification notify : inThisMin )
 			redisQueue.push(notify);
-		//return endSoon;
 	}
 }

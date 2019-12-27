@@ -68,7 +68,7 @@ public class NotificatorController {
 	@GetMapping("/message")
 	public void queue(@RequestBody String min/*String chann*/) throws InterruptedException {
 		
-		int ora= Calendar.getInstance().get(Calendar.HOUR)+12;
+		int ora= Calendar.getInstance().get(Calendar.HOUR);
 		int minuto = Integer.valueOf(min);
 		//int min = 35;
 		
@@ -78,38 +78,10 @@ public class NotificatorController {
 			log.info("pubblico " +i);
 			Notification x = new Notification("luca"+i, String.valueOf(i),LocalDateTime.of(2019, Month.DECEMBER, 18, ora,minuto),String.valueOf(i),String.valueOf(i),String.valueOf(i),"token");
 			log.info("publish"+x);
-			queue.push(x);
+			//queue.push(x);
 			//Thread.sleep(100);
-			//publisher.publish(x,new ChannelTopic("evictor"));
+			publisher.publish(x,new ChannelTopic("evictor"));
 		}
-		//int i = 0000;
-		//return RedisMessageListener.messageQueue.poll();
-//		log.info("dim : "+RedisMessageListener.messageQueue.size());
-//		Notification x = new Notification("luca", "demo",new Timestamp(14584478), "appuntamento","ecco alle 10","","");
-//		Notification notifica = RedisMessageListener.messageQueue.poll();
-
-		//log.info("print before replace "+ RedisMessageListener.messageQueue.size());
-//		if (notifica==null){
-//			return new Notification(null,null,null,null,null,null,null);
-//		}
-		
-		
-//								mail.from("luca.95b@live.it");
-//								mail.to("luca.95b@gmail.com");
-//								mail.subject(notifica.getTitle());
-//								mail.body(notifica.getContent());
-//								mail.send();
-//								Sms sms = new Sms();
-//								sms.sendSms(notifica.getTenant(), notifica.getTitle(), "??", "3341458565", "3382909785", notifica.getContent());
-//								template.SendNotification(notifica);
-//		return notifica;
-		//RedisMessageListener.messageQueue.poll());
-		//RedisMessageListener.messageQueue.poll();
-		
-		
-		//return x;
-		
-		//Notification x =  RedisMessageListener.messageList.poll();
 	}
 	
 	

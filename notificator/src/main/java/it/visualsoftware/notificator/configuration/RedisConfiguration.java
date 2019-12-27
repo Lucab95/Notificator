@@ -23,6 +23,7 @@ import it.visualsoftware.notificator.redis.RedisMessageListenerEvictor;
 import it.visualsoftware.notificator.redis.RedisMessagePublisher;
 import it.visualsoftware.notificator.redis.RedisQueueEvictor;
 import it.visualsoftware.notificator.redis.RedisQueueEx;
+import it.visualsoftware.notificator.redis.RedisSet;
 //import it.visualsoftware.notificator.redis.RedisSet;
 
 @Configuration
@@ -64,12 +65,12 @@ public class RedisConfiguration {
 		
 	}
 	
-//	@Bean
-//	RedisSet getSet(RedisTemplate<String, Object> redisTemplate) {
-//		RedisSet set = new RedisSet(redisTemplate,mapper,"set");
-//		return set;
-//		
-//	}
+	@Bean
+	RedisSet getSet(RedisTemplate<String, Object> redisTemplate) {
+		RedisSet set = new RedisSet(redisTemplate,mapper,"changesSet");
+		return set;
+		
+	}
 	
 //	@Bean
 //	MessageListenerAdapter messageListener(RedisQueueEx queue) {
@@ -78,21 +79,21 @@ public class RedisConfiguration {
 //	}
 	
 	@Bean
-	MessageListenerAdapter messageListener(RedisQueueEx queue,RedisHash hash) {
+	MessageListenerAdapter messageListener(RedisQueueEx queue,RedisSet set) {
 		
-	    return new MessageListenerAdapter(new RedisMessageListenerEvictor(mapper, hash));
+	    return new MessageListenerAdapter(new RedisMessageListenerEvictor(mapper, set));
 	}
 	
 	
 	@Bean
     RedisMessageListenerContainer redisContainer(JedisConnectionFactory jedisConnectionFactory,RedisQueueEx queue,
-    		RedisHash hash,RedisQueueEvictor queueEvents ){
+    		RedisSet set,RedisQueueEvictor queueEvents ){
 		RedisMessageListenerContainer container = new RedisMessageListenerContainer();
 	    container.setConnectionFactory(jedisConnectionFactory);	
 	    //container.addMessageListener(messageListener(queue), topic());
 	    queueEvents.listener(mapper,template);
 	    queue.listener(mapper,template);
-	    container.addMessageListener(messageListener(queue,hash),topic());
+	    container.addMessageListener(messageListener(queue,set),topic());
 	    return container;
     }
 

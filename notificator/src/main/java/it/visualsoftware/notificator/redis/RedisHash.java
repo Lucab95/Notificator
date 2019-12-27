@@ -38,8 +38,8 @@ public class RedisHash {
 	 * @param notify
 	 */
 	public void add(String hashName, String key , Notification notify) {
-		log.info("lock");
-		redis.opsForList().rightPop("lock",5, TimeUnit.SECONDS);
+//		log.info("lock");
+//		redis.opsForList().rightPop("lock",5, TimeUnit.SECONDS);
 //		while (redis.opsForList().size("lock")>0) {
 //			redis.opsForList().rightPop("lock");
 //		}
@@ -61,10 +61,11 @@ public class RedisHash {
 			}
 		}catch(Exception ex){
 			log.info("error on inserting notification");
-		}finally {
-			redis.opsForList().leftPush("lock", "1");
-			log.info("unlock");
 		}
+//		}finally {
+//			redis.opsForList().leftPush("lock", "1");
+//			log.info("unlock");
+//		}
 	}
 	
 	/**
