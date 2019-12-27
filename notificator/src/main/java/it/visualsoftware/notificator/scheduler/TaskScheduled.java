@@ -62,9 +62,7 @@ public class TaskScheduled {
 	@Scheduled(cron ="${cron.string.hour}")
 	@SchedulerLock(name = "TaskScheduler_nextHour", lockAtLeastForString = "PT5S", lockAtMostForString = "PT40S")
 	public List<Notification> nextHour() throws InterruptedException, JsonProcessingException {
-		//int currentMin = 0;
 		int hour = Calendar.getInstance().get(Calendar.HOUR)+1;
-		//String hashName = (hour%2==0) ?  "pari" : "pari";
 		String hashName="pari";
 		hash.flush(hashName);
 		log.info("\n stampa  alle {} \n", Calendar.getInstance() );
@@ -100,7 +98,6 @@ public class TaskScheduled {
 		int min = now.get(Calendar.MINUTE);
 		log.info("print {}:{}",hour,min);
 		String hashName = "pari";
-		log.info("size{}",set.size());
 		List<Object> map = set.popAll();
 		//valutazione per rimuovere/ togliere / modificare
 		log.info(""+map);

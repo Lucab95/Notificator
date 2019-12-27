@@ -33,9 +33,10 @@ public class SwaggerConfiguration {
         return new ApiInfoBuilder().title("Documentazione Notificator")
             .description("Notificator è un applicazione spring che integra due scheduler necessari al remind e all'invio delle notifiche da Leadmanager"
             		+ "Il primo scheduler si attiva al minuto 50 con cadenza oraria e si occupa di schedulare tutte le notifiche che dovranno essere inviate nei prossimi 60 minuti \n"
-            		+ "Il secondo scheduler si attiva ogni minuto e si occupa dell'invio delle notifiche, l'invio avviene 10 minuti prima della scadenza")
-//            .contact(new Contact("Visual Software srl", "https://www.visualsoftware.it/", "info@visualsoftware.it"))
-//            .license("Apache 2.0")
+            		+ "Il secondo scheduler si attiva ogni minuto e si occupa dell'invio delle notifiche, l'invio avviene 10 minuti prima della scadenza."
+            		+ "Durante la fase di attività dell'applicazione possono venire inseriti o modificati eventi nella fascia oraria di riferimento. In tal caso, tramite un subscribe ad un topic, gli eventi inclusi nella fascia oraria"
+            		+ "già schedulata, vengono trattati e rischedulati se necessario. ")//            .contact(new Contact("Visual Software srl", "https://www.visualsoftware.it/", "info@visualsoftware.it"))
+ //            .license("Apache 2.0")
 //            .licenseUrl("http://www.apache.org/licenses/LICENSE-2.0.html")
             .version(version)
             .build();

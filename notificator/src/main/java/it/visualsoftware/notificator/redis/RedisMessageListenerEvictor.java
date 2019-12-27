@@ -19,7 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class RedisMessageListenerEvictor implements MessageListener{
 	private  final ObjectMapper mapper;
-	//private RedisHash hash;
+//  private RedisHash hash;
 //	private final String hashName;
 	private RedisSet set;
 	
@@ -38,12 +38,8 @@ public class RedisMessageListenerEvictor implements MessageListener{
 			Notification notify = mapper.readValue(message.getBody(), Notification.class);
 			LocalDateTime now= LocalDateTime.now().plusMinutes(10);
 			LocalDateTime eventTime = notify.getEndDate();
-			log.info("\n ora di adesso {} e dell'evento {} \n", now, eventTime);
+			log.info("ora di adesso {} e dell'evento {} \n", now, eventTime);
 			if ((eventTime.getHour()==now.getHour())&&(eventTime.getMinute()>now.getMinute())){
-				//List<Notification> x = hash.get(hashName,min);
-				//x.add(notify);
-				//log.info("lista" + x);
-				//hash.put(hashName, min, x);
 				set.add(notify);
 
 			}

@@ -29,7 +29,6 @@ import it.visualsoftware.notificator.dao.NotificationDao;
 import it.visualsoftware.notificator.models.Notification;
 import it.visualsoftware.notificator.redis.RedisHash;
 import it.visualsoftware.notificator.redis.RedisMessagePublisher;
-import it.visualsoftware.notificator.redis.RedisQueueEvictor;
 import it.visualsoftware.notificator.models.ErrorInfo;
 //import it.visualsoftware.notificator.redis.RedisMessageListener;
 import lombok.extern.slf4j.Slf4j;
@@ -44,7 +43,7 @@ public class NotificatorController {
 	@Autowired
 	private RedisHash hash;
 	@Autowired
-	private RedisQueueEvictor queue;
+	//private RedisQueueEvictor queue;
 								//private MailSender mail;
 	public NotificatorController(NotificationDao repo) {
 //		this.template = template;
@@ -67,8 +66,8 @@ public class NotificatorController {
 	//TODO stampare messaggio
 	@GetMapping("/message")
 	public void queue(@RequestBody String min/*String chann*/) throws InterruptedException {
-		
-		int ora= Calendar.getInstance().get(Calendar.HOUR);
+		//TODO ORA IN formato 24
+		int ora= Calendar.getInstance().get(Calendar.HOUR)+12;
 		int minuto = Integer.valueOf(min);
 		//int min = 35;
 		

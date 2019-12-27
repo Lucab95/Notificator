@@ -42,10 +42,9 @@ public class RedisQueueEx extends RedisQueue<Notification>{
 	@Async
 	public void listener(ObjectMapper mapper, RestTemplateService template) {
 		log.info("Open listener on queue: {}",queueName);
-		ListOperations<String, Object> operations=redis.opsForList();//rightPopAndLeftPush(queueName, "", timeout, unit)boundListOps();
+		ListOperations<String, Object> operations=redis.opsForList();
 		while (true) {
 			Object job = (Object) operations.rightPop(queueName, 0, TimeUnit.SECONDS);
-			//T job = (T) operations.rightPop(queueName);
 			if (job!=null) {
 				log.info("Executing job: {}", mapper.convertValue(job, Notification.class));
 				try {

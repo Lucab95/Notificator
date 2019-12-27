@@ -14,6 +14,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.transaction.annotation.Transactional;
 
 //import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -40,9 +41,10 @@ class NotificatorApplicationTests {
 
 	
 	@Test
+	@Transactional
 	public void populate() throws Exception{
 		long millis = new Date().getTime();
-		for (int i=3000;i<4000;i++) {
+		for (int i=1;i<2;i++) {
 		repository.insertNotification(new Notification("luca"+i, "demo"+i,
 								LocalDateTime.ofInstant(Instant.ofEpochMilli(millis), TimeZone.getDefault().toZoneId()),
 								"prova"+i,"content"+i,"url"+i,"token" ));
@@ -57,6 +59,7 @@ class NotificatorApplicationTests {
 		
 		}
 		log.info("inserimento completato");
+//		throw new RuntimeException();
 
 	}
 //	

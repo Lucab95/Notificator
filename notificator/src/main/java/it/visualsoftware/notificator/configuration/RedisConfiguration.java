@@ -11,20 +11,15 @@ import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.data.redis.listener.adapter.MessageListenerAdapter;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
-
-//import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-//import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import it.visualsoftware.notificator.RestTemplate.RestTemplateService;
 import it.visualsoftware.notificator.redis.MessagePublisher;
 import it.visualsoftware.notificator.redis.RedisHash;
 import it.visualsoftware.notificator.redis.RedisMessageListenerEvictor;
 import it.visualsoftware.notificator.redis.RedisMessagePublisher;
-import it.visualsoftware.notificator.redis.RedisQueueEvictor;
 import it.visualsoftware.notificator.redis.RedisQueueEx;
 import it.visualsoftware.notificator.redis.RedisSet;
-//import it.visualsoftware.notificator.redis.RedisSet;
 
 @Configuration
 public class RedisConfiguration {
@@ -53,18 +48,25 @@ public class RedisConfiguration {
 		RedisQueueEx queue = new RedisQueueEx(redisTemplate, "queue");
 		return queue;
 	}
-	@Bean 
-	RedisQueueEvictor getQueueEvents(RedisTemplate <String,Object> redisTemplate) {
-		RedisQueueEvictor queueEvents = new RedisQueueEvictor(redisTemplate,"events_queue");
-		return queueEvents;
-	}
+//	@Bean 
+//	RedisQueueEvictor getQueueEvents(RedisTemplate <String,Object> redisTemplate) {
+//		RedisQueueEvictor queueEvents = new RedisQueueEvictor(redisTemplate,"events_queue");
+//		return queueEvents;
+//	}
+	
+	/**
+	 * RedisHash per notifiche schedulate
+	 * @param redisTemplate
+	 * @return hash
+	 */
 	@Bean
 	RedisHash getHash(RedisTemplate<String, Object> redisTemplate) {
 		RedisHash hash = new RedisHash(redisTemplate,mapper);
 		return hash;
 		
 	}
-	
+
+	//RedisSet per notifiche da modificare se la modifiche è nella prossima ora con Evictor
 	@Bean
 	RedisSet getSet(RedisTemplate<String, Object> redisTemplate) {
 		RedisSet set = new RedisSet(redisTemplate,mapper,"changesSet");
@@ -87,11 +89,11 @@ public class RedisConfiguration {
 	
 	@Bean
     RedisMessageListenerContainer redisContainer(JedisConnectionFactory jedisConnectionFactory,RedisQueueEx queue,
-    		RedisSet set,RedisQueueEvictor queueEvents ){
+    		RedisSet set){//RedisQueueEvictor queueEvents ){
 		RedisMessageListenerContainer container = new RedisMessageListenerContainer();
 	    container.setConnectionFactory(jedisConnectionFactory);	
 	    //container.addMessageListener(messageListener(queue), topic());
-	    queueEvents.listener(mapper,template);
+	    //queueEvents.listener(mapper,template);
 	    queue.listener(mapper,template);
 	    container.addMessageListener(messageListener(queue,set),topic());
 	    return container;
