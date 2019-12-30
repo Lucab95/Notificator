@@ -38,11 +38,11 @@ import lombok.extern.slf4j.Slf4j;
 @RequestMapping("/api")
 public class NotificatorController {
 	private final NotificationDao repository;
-	@Autowired
-	private RedisMessagePublisher publisher;
-	@Autowired
-	private RedisHash hash;
-	@Autowired
+//	@Autowired
+//	private RedisMessagePublisher publisher;
+//	@Autowired
+//	private RedisHash hash;
+//	@Autowired
 	//private RedisQueueEvictor queue;
 								//private MailSender mail;
 	public NotificatorController(NotificationDao repo) {
@@ -80,13 +80,13 @@ public class NotificatorController {
 			log.info("publish"+x);
 			//queue.push(x);
 			//Thread.sleep(100);
-			publisher.publish(x,new ChannelTopic("evictor"));
+			//publisher.publish(x,new ChannelTopic("evictor"));
 		}
 	}
 	@PostMapping("/delete")
 	public void delete(@RequestBody Notification notify) throws InterruptedException {
 		log.info("notify remove {} " ,notify);
-		hash.remove("pari", "13", new Notification(notify.getUsr(), notify.getTenant(),LocalDateTime.of(2019, Month.DECEMBER, 30, 16,13),notify.getTitle(),notify.getContent(),notify.getUrl(),"token","remove"));
+		//hash.remove("pari", "13", new Notification(notify.getUsr(), notify.getTenant(),LocalDateTime.of(2019, Month.DECEMBER, 30, 16,13),notify.getTitle(),notify.getContent(),notify.getUrl(),"token","remove"));
 //		Notification x = new Notification(notify.getUsr(), notify.getTenant(),LocalDateTime.of(2019, Month.DECEMBER, 30, 12,41,36,156),notify.getTitle(),notify.getContent(),notify.getUrl(),"token", "remove");
 //		publisher.publish(x ,new ChannelTopic("evictor"));
 		}

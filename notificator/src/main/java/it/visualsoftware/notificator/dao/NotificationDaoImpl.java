@@ -61,15 +61,17 @@ public class NotificationDaoImpl implements NotificationDao {
 	@Override
 	public List<Notification> nextHour(long interval) {
 		Calendar now = Calendar.getInstance();
-		int startHour = now.get(Calendar.HOUR);
+		int startHour = 14;//now.get(Calendar.HOUR);
 		log.info("start"+startHour);
 		now.set(Calendar.MILLISECOND,00);
+		now.set(Calendar.DAY_OF_MONTH, 24);
 		now.set(Calendar.SECOND,00);
 		now.set(Calendar.MINUTE,00);
-		now.set(Calendar.HOUR,startHour+1);//7:50->8:00
+		now.set(Calendar.YEAR, 2019);
+		now.set(Calendar.HOUR_OF_DAY, 14);//startHour+1);//7:50->8:00
 		Calendar after = (Calendar) now.clone();
 		
-		after.set(Calendar.HOUR,startHour+2);//8->9
+		after.set(Calendar.HOUR_OF_DAY,startHour+3);//8->9
 		Timestamp start = new Timestamp(now.getTimeInMillis());
 		Timestamp end = new Timestamp(after.getTimeInMillis());
 //		now.setNanos(0);
@@ -79,7 +81,7 @@ public class NotificationDaoImpl implements NotificationDao {
 //		long afterMillis = now.getTime() + interval;
 // 		Timestamp after = new Timestamp(afterMillis).getHours();
 		log.info("from min "+ start + " to " + end );
-		String sql ="SELECT * FROM notification WHERE end_date BETWEEN '" + start     + "' AND '" +end+ "' ORDER BY end_date ASC";
+		String sql ="select assignee as usr, 'dtidona' as tenant, calendar_date_start as end_date, 'Appuntamento' as title, description as content, null as url from dtidona.activity_view WHERE calendar_date_start BETWEEN '" + start     + "' AND '" +end+ "' ORDER BY calendar_date_start ASC";
 		return template.query(sql, new NotificationRowMapper());
 	}
 

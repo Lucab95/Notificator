@@ -91,7 +91,7 @@ public class RedisConfiguration {
 	
 	
 	@Bean
-    RedisMessageListenerContainer redisContainer(JedisConnectionFactory jedisConnectionFactory,RedisQueueEx queue,
+    RedisMessageListenerContainer redisContainer(RedisConnectionFactory jedisConnectionFactory,RedisQueueEx queue,
     		RedisSet set){//RedisQueueEvictor queueEvents ){
 		RedisMessageListenerContainer container = new RedisMessageListenerContainer();
 	    container.setConnectionFactory(jedisConnectionFactory);	

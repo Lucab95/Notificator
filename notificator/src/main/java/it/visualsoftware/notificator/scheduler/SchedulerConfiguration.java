@@ -1,40 +1,52 @@
 package it.visualsoftware.notificator.scheduler;
 
+
+import java.lang.reflect.Field;
 import java.time.Duration;
 
-import javax.sql.DataSource;
-
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.context.annotation.Profile;
+import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 
+import net.javacrumbs.shedlock.core.DefaultLockingTaskExecutor;
 import net.javacrumbs.shedlock.core.LockProvider;
-import net.javacrumbs.shedlock.provider.jdbctemplate.JdbcTemplateLockProvider;
+import net.javacrumbs.shedlock.core.LockingTaskExecutor;
+import net.javacrumbs.shedlock.provider.redis.jedis.JedisLockProvider;
 import net.javacrumbs.shedlock.spring.ScheduledLockConfiguration;
 import net.javacrumbs.shedlock.spring.ScheduledLockConfigurationBuilder;
-import net.javacrumbs.shedlock.spring.annotation.EnableSchedulerLock;
+import redis.clients.jedis.Jedis;
+//import redis.clients.jedis.util.Pool;
+import redis.clients.util.Pool;
 
 @Configuration
-@EnableScheduling
-@EnableSchedulerLock(defaultLockAtMostFor = "PT30S")
-@ComponentScan("it.visualsoftware.notificator.scheduler")
-
+@Profile("scheduler")
 public class SchedulerConfiguration {
-	//private final ENV = "default"
+	
+	private static final String ENV = "LM";	
 	
 	@Bean
-    public LockProvider lockProvider(DataSource dataSource) { //JedisPool jedisPool)  {
-		Object jedisPool;
-        return new JdbcTemplateLockProvider(dataSource, "shedlock");
-    }
+	public ScheduledLockConfiguration taskScheduler(LockProvider lockProvider) {
+	    return ScheduledLockConfigurationBuilder
+	        .withLockProvider(lockProvider)
+	        .withPoolSize(10)
+	        .withDefaultLockAtMostFor(Duration.ofMinutes(30))	        
+	        .build();
+	}	
+	//TODO Parlare con andrea, per problemi dependency
+	@SuppressWarnings("unchecked")
+	@Bean
+	public LockProvider lockProvider(JedisConnectionFactory factory) throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+		Field privatePool=JedisConnectionFactory.class.getDeclaredField("pool");
+		privatePool.setAccessible(true);
+		Pool<Jedis> pool=(Pool<Jedis>)privatePool.get(factory);
+	    return new JedisLockProvider(pool, ENV);
+	}
 	
-	 @Bean
-	    public ScheduledLockConfiguration scheduledLockConfiguration(LockProvider lockProvider) {
-	        return ScheduledLockConfigurationBuilder
-	                .withLockProvider(lockProvider)
-	                .withPoolSize(10)
-	                .withDefaultLockAtMostFor(Duration.ofSeconds(30))
-	                .build();
-	    }
+	@Bean 
+	public LockingTaskExecutor lockingTaskExecutor(LockProvider lockProvider) {
+		return new DefaultLockingTaskExecutor(lockProvider);
+	}
+
 }
+
