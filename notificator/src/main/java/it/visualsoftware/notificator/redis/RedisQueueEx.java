@@ -33,7 +33,6 @@ public class RedisQueueEx extends RedisQueue<Notification>{
 		BoundListOperations<String, Object> operations=redis.boundListOps(queueName);
 		operations.leftPush(job);
 	}
-	
 	/**
 	 * listener per eseguire le richieste 
 	 * @param mapper

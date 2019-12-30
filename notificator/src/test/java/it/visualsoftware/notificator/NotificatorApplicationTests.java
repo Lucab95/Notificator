@@ -1,9 +1,10 @@
-package it.visualsoftware.notificator;
+ package it.visualsoftware.notificator;
 
 
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.Month;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
@@ -12,7 +13,9 @@ import java.util.TimeZone;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.cache.CacheProperties.Redis;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,8 +23,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import it.visualsoftware.notificator.dao.NotificationDao;
 import it.visualsoftware.notificator.models.Notification;
-import it.visualsoftware.notificator.redis.RedisMessagePublisher;
 import lombok.extern.slf4j.Slf4j;
+
 
 @RunWith(SpringRunner.class)
 @SpringBootTest()
@@ -29,9 +32,14 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 class NotificatorApplicationTests {
 	//private MockMvc mvc;
+
 	@Autowired
 	private NotificationDao repository;
-	
+	@Autowired
+	private RedisTemplate<String, Object> redis;
+//	@Autowired
+//	private RedisSet redis;
+//	
 //	private RedisMessagePublisher publisher;
 	
 	/*public NotificatorApplicationTests(NotificationDao repository) {
@@ -41,14 +49,14 @@ class NotificatorApplicationTests {
 
 	
 	@Test
-	@Transactional
 	public void populate() throws Exception{
 		long millis = new Date().getTime();
-		for (int i=1;i<2;i++) {
+		for (int i=1;i<1000;i++) {
 		repository.insertNotification(new Notification("luca"+i, "demo"+i,
 								LocalDateTime.ofInstant(Instant.ofEpochMilli(millis), TimeZone.getDefault().toZoneId()),
 								"prova"+i,"content"+i,"url"+i,"token" ));
 		millis=millis+new Random().nextInt(240000)+120000; //from 2 min to 7
+		
 		/*mvc.perform(MockMvcRequestBuilders
 			      .post("/create")
 			      .content(asJsonString(new Notification("luca", "demo4", new NotifyContent("prova4","content","url"))))
@@ -59,7 +67,7 @@ class NotificatorApplicationTests {
 		
 		}
 		log.info("inserimento completato");
-//		throw new RuntimeException();
+		
 
 	}
 //	

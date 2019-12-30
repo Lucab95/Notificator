@@ -8,6 +8,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.connection.RedisConnection;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -32,6 +33,7 @@ public class TaskScheduled {
 	private NotificationDao repository;
 	//@Autowired
 	//RedisMessagePublisher redis;
+	protected final RedisTemplate<String,Object> redis;
 	@Autowired
 	ObjectMapper mapper;
 	private RedisQueueEx redisQueue;
@@ -45,10 +47,11 @@ public class TaskScheduled {
 	
 	
 	
-	public TaskScheduled(NotificationDao repository, RedisHash hash, RedisQueueEx redisQueue/*, RedisMessagePublisher redis*/) {
+	public TaskScheduled(NotificationDao repository, RedisHash hash, RedisQueueEx redisQueue, RedisTemplate<String,Object> redis) {
 		this.repository=repository;
 		this.hash= hash;
 		this.redisQueue=redisQueue;
+		this.redis=redis;
 		//this.redis=redis;
 	}
 	
@@ -92,7 +95,7 @@ public class TaskScheduled {
 	@SchedulerLock(name = "TaskScheduler_nextMin", lockAtLeastForString = "PT15S", lockAtMostForString = "PT40S")
 	public void nextMin() throws InterruptedException, JsonProcessingException {
 		Calendar now = Calendar.getInstance();
-		log.info(" stampa  alle {} ", new Date() );
+		log.info(" stampa  alle {} ", new Date());
 		now.add(Calendar.MINUTE, 10);
 		int hour = now.get(Calendar.HOUR);
 		int min = now.get(Calendar.MINUTE);
@@ -100,13 +103,24 @@ public class TaskScheduled {
 		String hashName = "pari";
 		List<Object> map = set.popAll();
 		//valutazione per rimuovere/ togliere / modificare
-		log.info(""+map);
+		log.info("map"+map);
 		//dare precedenza
 		if (!(map.isEmpty())) {
-			List<Notification> changes = mapper.convertValue(map, new TypeReference<List<Notification>>(){});
+			List<Notification> changes = mapper.convertValue(map.get(0), new TypeReference<List<Notification>>(){});
 			for (Notification notify : changes){
 				String evMin= String.valueOf(notify.getEndDate().getMinute());
-				hash.add(hashName, evMin, notify);
+				String type = notify.getType();
+				log.info("type: {}",type);
+				if (type.equals("insert")){
+					hash.add(hashName, evMin, notify);
+				}else if (type.equals("remove")){
+					hash.remove(hashName, evMin, notify);
+				}else if (type.equals("modify")){
+					redis.multi();
+					hash.remove(hashName, evMin, notify);
+					hash.add(hashName, evMin, notify);
+					redis.exec();
+				}	
 				log.info("notify {} , {}",notify);
 			}
 		}

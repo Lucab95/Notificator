@@ -7,6 +7,9 @@ import java.util.List;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
+import org.springframework.data.redis.connection.RedisConnection;
+import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,6 +19,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import it.visualsoftware.notificator.models.Notification;
 import lombok.extern.slf4j.Slf4j;
 import redis.clients.jedis.Jedis;
+import redis.clients.jedis.Response;
 import redis.clients.jedis.Transaction;
 
 @Slf4j
@@ -35,38 +39,35 @@ public class RedisSet {
 	 * @param notify
 	 */
 	public void add(Notification notify) {
-		long x =redis.opsForSet().add(setName, notify);
-		log.info("insert {}",x);
+		long inserted =redis.opsForSet().add(setName, notify);
+		if (inserted==1) {
+			log.info("inserted ");
+		}else {
+			log.info("failed ");
+		}
+		
 	}
 	
-	//TODO vedere transazione per la pop/size
+	//TODO ricontrollare con andrea e vedere se va ciclata in casa di fallimento
 	/**
 	 * rimuove tutti gli elementi dall'insieme e li ritorna in output
 	 * @return List<Object>
 	 */
-	@Transactional
 	public List<Object> popAll(){
+		redis.watch(setName);
 		long size = redis.opsForSet().size(setName);
-		log.info("size: {}", size);
-		redis.opsForSet().pop(setName, size);
-		List<Object> objectList = redis.opsForSet().pop(setName, size);
+		redis.multi();
+		log.info(""+size);
+		redis.opsForSet().pop(setName,size);
+		List<Object> objectList =  redis.exec();
+//		log.info( ""+redis.exec());
+//		List<Object> objectList =  new ArrayList<Object>();
+		redis.unwatch();
 		if (objectList.isEmpty()) {
 			return new ArrayList<Object>();
 		}else {
 			return objectList;
-		}
-		
-		
-	}
-	
-	//useless
-	public void remove(Notification notify) {
-		log.info(""+redis.opsForSet().remove(setName,notify));	
-		}
-	
-	//dim dell'insieme
-	public Long size() {
-		return redis.opsForSet().size(setName);
+		}	
 	}
 	
 }

@@ -25,7 +25,7 @@ public class SchedulerConfiguration {
 	
 	@Bean
     public LockProvider lockProvider(DataSource dataSource) { //JedisPool jedisPool)  {
-		//return new JedisLockProvider(jedisPool, ENV);
+		Object jedisPool;
         return new JdbcTemplateLockProvider(dataSource, "shedlock");
     }
 	

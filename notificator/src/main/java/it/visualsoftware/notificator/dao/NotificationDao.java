@@ -9,6 +9,7 @@ public interface NotificationDao {
 	List<Notification> findall();
 	
 	void insertNotification(Notification notify);
+//	void removeNotification(Notification notify);
 	
 	//List<Notification> nextMinutes(long interval);
 	

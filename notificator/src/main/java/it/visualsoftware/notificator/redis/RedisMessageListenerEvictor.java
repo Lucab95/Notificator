@@ -41,7 +41,6 @@ public class RedisMessageListenerEvictor implements MessageListener{
 			log.info("ora di adesso {} e dell'evento {} \n", now, eventTime);
 			if ((eventTime.getHour()==now.getHour())&&(eventTime.getMinute()>now.getMinute())){
 				set.add(notify);
-
 			}
 			else {
 				log.info("insert 0");

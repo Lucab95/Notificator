@@ -6,7 +6,6 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @SpringBootApplication
 @EnableScheduling
-@EnableTransactionManagement
 public class NotificatorApplication {
 
 	public static void main(String[] args) {

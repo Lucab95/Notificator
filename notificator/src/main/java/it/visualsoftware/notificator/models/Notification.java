@@ -21,8 +21,19 @@ public @Data class Notification {
 	private String content;
 	private String url;
 	private String token;
+	private String type;
 	
 	public Notification() {}
+	public Notification(String usr, String tenant,LocalDateTime end, String title, String content, String url, String token, String type) {
+		this.usr = usr;
+		this.tenant = tenant;
+		this.endDate=end;
+		this.title=title;
+		this.content=content;
+		this.url = url;
+		this.token=token;
+		this.type=type;
+	}
 	public Notification(String usr, String tenant,LocalDateTime end, String title, String content, String url, String token) {
 		this.usr = usr;
 		this.tenant = tenant;

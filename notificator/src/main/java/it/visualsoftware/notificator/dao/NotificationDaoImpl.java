@@ -45,22 +45,18 @@ public class NotificationDaoImpl implements NotificationDao {
         log.info("holder is ()" +holder.toString());
         
 	}
-
+	
 //	@Override
-//	public List<Notification> nextMinutes(long interval) {
-//		interval=interval*60000;
-//		long nowMillis = new Date().getTime();
-//		Timestamp now = new Timestamp(nowMillis);
-//		now.setNanos(0);
-//		log.info("interval"+ interval +"  "+nowMillis);
-//		long afterMillis = now.getTime() + interval;
-// 		Timestamp after = new Timestamp(afterMillis);
-//		log.info("from min "+ now + " to " + after );
-//		String sql ="SELECT * FROM notification WHERE end_date BETWEEN '" +now+ "' AND '" +after+ "'";
-//		return template.query(sql, new NotificationRowMapper());
+//	public void removeNotification(Notification notify) {
+//		final String sql = "delete from notification(usr, tenant, end_date) values (:usr,:tenant,:end_date)";
+//		SqlParameterSource param = new MapSqlParameterSource()
+//				.addValue("usr", notify.getUsr())
+//				.addValue("tenand", notify.getTenant())
+//				.addValue("end_date", notify.getEndDate());
+//		log.info("deleted {}", template.update(sql, param));
 //		
-//		//publish su redis
 //	}
+
 	
 	@Override
 	public List<Notification> nextHour(long interval) {
@@ -86,5 +82,6 @@ public class NotificationDaoImpl implements NotificationDao {
 		String sql ="SELECT * FROM notification WHERE end_date BETWEEN '" + start     + "' AND '" +end+ "' ORDER BY end_date ASC";
 		return template.query(sql, new NotificationRowMapper());
 	}
+
 	
 }

@@ -75,22 +75,25 @@ public class RedisHash {
 	 * @param notify
 	 */
 	public void remove(String hashName, String key , Notification notify) {
-		log.info("lock");
-		redis.opsForList().rightPop("lock",5, TimeUnit.SECONDS);
-		try{
 			List<Notification> inThisMin;
 			Object map = redis.opsForHash().get(hashName,key);
+			log.info("null {}", map);
 			if (map!=null) {
 				inThisMin= mapper.convertValue(map, new TypeReference<List<Notification>>(){});
-				log.info("object removed {}",inThisMin.remove(notify));
+				log.info("lsita "+ inThisMin);
+				Iterator<Notification> iter = inThisMin.iterator();
+				while (iter.hasNext()) {
+					Notification curr = iter.next();
+					if ((curr.getUsr().equals(notify.getUsr()))&&(curr.getTenant().equals(notify.getTenant()))/*&&(x.getEndDate()==notify.getEndDate())*/) {
+						log.info("object removed ");
+						iter.remove();
+					}else {
+						log.info("failed {}", curr);
+					}
+				}
+				log.info("put"+ inThisMin);
 				redis.opsForHash().put(hashName, key, inThisMin);
 			}
-		}catch(Exception ex){
-			log.info("error on removing scheduled notification");
-		}finally {
-			redis.opsForList().leftPush("lock", "1");
-			log.info("unlock");
-		}
 	}
 	
 	/**

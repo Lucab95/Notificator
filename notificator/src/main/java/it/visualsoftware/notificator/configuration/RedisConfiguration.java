@@ -11,6 +11,8 @@ import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.data.redis.listener.adapter.MessageListenerAdapter;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import it.visualsoftware.notificator.RestTemplate.RestTemplateService;
@@ -40,6 +42,7 @@ public class RedisConfiguration {
     	template.setValueSerializer(new GenericJackson2JsonRedisSerializer(mapper));
     	template.setHashKeySerializer(new StringRedisSerializer());
     	template.setHashValueSerializer(new GenericJackson2JsonRedisSerializer(mapper));
+    	template.setEnableTransactionSupport(true); 
     	return template;
     }
 	
@@ -98,7 +101,8 @@ public class RedisConfiguration {
 	    container.addMessageListener(messageListener(queue,set),topic());
 	    return container;
     }
-
+	
+	
 
     @Bean
     MessagePublisher redisPublisher(RedisTemplate <String,Object> redisTemplate) {
